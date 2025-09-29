@@ -12,6 +12,15 @@ from enum import Enum
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
 
+modes = ["SN", "HU", "Ref"]
+out_formats = [".txt", ".xls"]
+
+def is_xml(file_path):
+    if  os.path.isfile(file_path) and file_path.endswith(".XML"):
+        return True
+    else:
+        return False
+
 def ref_des_finder(ref_list, xml_path):
     #returns reference matches from a single xml file in dictionary format -> "ID": set{ref1, ref2}
     xml_tree = ET.parse(xml_path)
@@ -29,6 +38,27 @@ def ref_des_finder(ref_list, xml_path):
                                 matches[id.attrib["id"]].add(refdes.text)
                     
     return matches
+
+def sn_finder(folder_path, sn_list):
+    #returns a list of absolute filepaths of maches sn files
+    #if folder is found, call this function recursively with updated path
+    matches = []
+    files = os.listdir(folder_path)
+    for file in files:
+        f_path = os.path.join(folder_path, file)
+        if is_xml(f_path):
+            for sn in sn_list:
+                if file.startswith(sn):
+                    matches.append(f_path)
+        elif os.path.isdir(f_path):
+            #recursive call further down the three
+            rec_matches = sn_finder(f_path, sn_list)
+            if rec_matches:
+                matches.extend(rec_matches)
+    return matches
+
+
+
 
 def get_component_data_from_id(id_dict, xml_path):
     xml_tree = ET.parse(xml_path)
@@ -54,12 +84,6 @@ def get_component_data_from_id(id_dict, xml_path):
     #example of an output -> {"{'Q1'}": {'PN': '20005985', 'HU': '001014656171', 'LC': '012218', 'TS': '25/04/2024 04:09:11'}}, {"{'Q1'}"}
     #tuple 1 -> nested dictionary, 2 -> set of strings (keys for nested dictionary)
     return component_data, ref_keys
-
-def format_check(file_name, file_path):
-    if not os.path.exists(file_path) or not os.path.isfile(file_path) or not file_name.endswith(".XML"):
-        return False
-    else:
-        return True
 
     
 def get_data_from_filename(file_name):
@@ -118,10 +142,10 @@ def main():
     data = tracibility_data[0]
     keys = tracibility_data[1]
 
-    text = data_to_text(file_data, data, keys)
+    print(sn_finder(sample_dir, ["1513028976", "1513054730", "1513562221"]))
 
-    with open(rep_path, "w") as file:
-        file.write(text)
+    #with open(rep_path, "w") as file:
+    #    file.write(text)
 
 
 main()

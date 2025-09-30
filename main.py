@@ -20,6 +20,31 @@ def is_xml(file_path):
         return True
     else:
         return False
+    
+def ref_key(ref):
+    #creates key to for sorted()
+    j = 0
+    for i in range(0, len(ref)):
+        if not ref[i].isdigit():
+            j = i
+        else:
+            break
+    key = ref[j:]
+    while len(key) < 5:
+        key = "0" + key
+    return key
+
+def ref_to_str(ref_set):
+    #converts set of references to sorted string
+    ref_list = sorted(list(ref_set), key=lambda ref: ref_key(ref))
+    return str(ref_list).strip("[]").replace("'", "")
+
+def convert_time_stamp(time_stamp):
+    if len(time_stamp) != 16:
+        return "UnknownTimeFormat"
+    else:
+        return f"{time_stamp[6:8]}/{time_stamp[4:6]}/{time_stamp[0:4]} {time_stamp[8:10]}:{time_stamp[10:12]}:{time_stamp[12:14]}"
+
 
 def ref_des_finder(ref_list, xml_path):
     #returns reference matches from a single xml file in dictionary format -> "ID": set{ref1, ref2}
@@ -57,36 +82,8 @@ def sn_finder(folder_path, sn_list):
                 matches.extend(rec_matches)
     return matches
 
-
-
-
-def get_component_data_from_id(id_dict, xml_path):
-    xml_tree = ET.parse(xml_path)
-    xml_root = xml_tree.getroot()
-    # use xml_root.attrib to capture time stamps + serial number
-    component_data = {}
-    ref_keys = set()
-    for branch in xml_root:
-        if branch.tag == "charge":
-            for id in id_dict:
-                if id == branch.attrib["id"]:
-                    temp_time = xml_root.attrib["dateComplete"]
-                    #maybe create separate function for date conversion?
-                    if len(temp_time) != 16:
-                        formated_time = "UnknownTimeFormat"
-                    else:
-                        formated_time = f"{temp_time[6:8]}/{temp_time[4:6]}/{temp_time[0:4]} {temp_time[8:10]}:{temp_time[10:12]}:{temp_time[12:14]}"
-                    refset_key = f"{id_dict[id]}"
-                    component_data[refset_key] = {"PN": branch.attrib["barc1"], "HU": branch.attrib["barc6"], "LC": branch.attrib["barc2"], "TS": formated_time}
-                    ref_keys.add(refset_key)
-
-    #returns nested dictionary and set of keys
-    #example of an output -> {"{'Q1'}": {'PN': '20005985', 'HU': '001014656171', 'LC': '012218', 'TS': '25/04/2024 04:09:11'}}, {"{'Q1'}"}
-    #tuple 1 -> nested dictionary, 2 -> set of strings (keys for nested dictionary)
-    return component_data, ref_keys
-
-    
 def get_data_from_filename(file_name):
+    #improve error returns...!!!
     data = {}
     split_name = file_name.split("-", maxsplit=2)
     if len(split_name) != 3:
@@ -102,6 +99,73 @@ def get_data_from_filename(file_name):
             data["REV"] = f"{split_name[1][9:]}"
     #returns folowing dictionary {'SN': '1513054730', 'PB': 'PB5002100', 'REV': '1J'}
     return data
+
+def get_sn_tracibility(file_paths):
+    data = []
+    for file in file_paths:
+        refdes = {}
+        file_data = get_data_from_filename(os.path.basename(file))
+        file_data["DATA"] = {}
+        sn_data = file_data["DATA"]
+
+        file_thee = ET.parse(file)
+        tree_root = file_thee.getroot()
+        panel_branch = tree_root.find("panel")
+        time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
+        #maybe loop over the tree instead of find()? what if multiple panels? - unlikely
+        for id in panel_branch:
+            ref_set = set()
+            for ref in id:
+                ref_set.add(ref.text)
+            refdes[id.attrib["id"]] = ref_set
+        #after this loop, IDs and references are stored in refdes dictionary for every single file -> ready to be paired with charges.
+        for id in refdes:
+            references = refdes[id]
+            #create red_key func for sorting
+            for branch in tree_root:
+                if branch.tag == "panel":
+                    continue
+                if branch.attrib["id"] == id:
+                    pn = branch.attrib["barc1"]
+                    hu = branch.attrib["barc6"]
+                    lc = branch.attrib["barc2"]
+                    if hu in sn_data:
+                        sn_data[hu]["REF"].update(references)
+                    else:
+                        sn_data[hu] = {"REF": references, "PN": pn, "LC": lc, "TS": time_stamp }
+        data.append(file_data)
+    #returns a list of nested dictionaties
+    #[{'SN': 'sn', 'PB': 'pb', 'REV': 'rev', 'DATA': {
+    # '001013791456': {'REF': {'R26'}, 'PN': '10009080', 'LC': 'R2247Q2320', 'TS': '25/04/2024 04:09:11'},
+    # '001014030211': {'REF': {'R21'}, 'PN': 'P2018321', 'LC': '03901026', 'TS': '25/04/2024 04:09:11'}}]
+    return data
+            
+
+
+
+def get_component_data_from_id(id_dict, xml_path):
+    xml_tree = ET.parse(xml_path)
+    xml_root = xml_tree.getroot()
+    # use xml_root.attrib to capture time stamps + serial number
+    component_data = {}
+    ref_keys = set()
+    for branch in xml_root:
+        if branch.tag == "charge":
+            for id in id_dict:
+                if id == branch.attrib["id"]:
+                    convert_time_stamp = convert_time_stamp(xml_root.attrib["dateComplete"])
+
+                    refset_key = f"{id_dict[id]}"
+                    component_data[refset_key] = {"PN": branch.attrib["barc1"], "HU": branch.attrib["barc6"], "LC": branch.attrib["barc2"], "TS": formated_time}
+                    ref_keys.add(refset_key)
+
+    #returns nested dictionary and set of keys
+    #example of an output -> {"{'Q1'}": {'PN': '20005985', 'HU': '001014656171', 'LC': '012218', 'TS': '25/04/2024 04:09:11'}}, {"{'Q1'}"}
+    #tuple 1 -> nested dictionary, 2 -> set of strings (keys for nested dictionary)
+    return component_data, ref_keys
+
+    
+
 
 def data_to_text(file_name_data, tracibility_data, tracibility_keys):
     #add safeguards
@@ -142,7 +206,8 @@ def main():
     data = tracibility_data[0]
     keys = tracibility_data[1]
 
-    print(sn_finder(sample_dir, ["1513028976", "1513054730", "1513562221"]))
+    paths = sn_finder(sample_dir, ["1513028976", "1513054730", "1513562221"])
+    get_sn_tracibility(paths)
 
     #with open(rep_path, "w") as file:
     #    file.write(text)

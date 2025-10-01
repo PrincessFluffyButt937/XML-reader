@@ -45,24 +45,27 @@ def convert_time_stamp(time_stamp):
     else:
         return f"{time_stamp[6:8]}/{time_stamp[4:6]}/{time_stamp[0:4]} {time_stamp[8:10]}:{time_stamp[10:12]}:{time_stamp[12:14]}"
 
+def time_filter(start, end, timestamp):
+    timestamp = int(timestamp)
+    #accepts time formats YYYYMMDD
+    if timestamp >= start and timestamp <= end:
+        return True
+    else:
+        return False
 
-def ref_des_finder(ref_list, xml_path):
-    #returns reference matches from a single xml file in dictionary format -> "ID": set{ref1, ref2}
-    xml_tree = ET.parse(xml_path)
-    xml_root = xml_tree.getroot()
-    matches = {}
-    for child in xml_root:
-        if child.tag == "panel":
-            for id in child:
-                for refdes in id:
-                    for ref in ref_list:
-                        if refdes.text == ref:
-                            if id.attrib["id"] not in matches:
-                                matches[id.attrib["id"]] = {refdes.text}
-                            else:
-                                matches[id.attrib["id"]].add(refdes.text)
-                    
-    return matches
+def get_timestamp_from_filename(filename):
+    filename = "1513028976-PB30577001I-1-NO-PCB-BARCODE2545-20240405063324.XML"
+    spl = filename.rsplit("-", maxsplit=1)
+    if len(spl) != 2:
+        return f"Error - unkown file format -> {filename}"
+    time = spl[1].rstrip(".XML")
+    if time.isdecimal() and len(time) == 14:
+        return time[0:8]
+    else:
+        return f"Error - unkown time format -> {filename}"
+
+
+
 
 def sn_finder(folder_path, sn_list):
     #returns a list of absolute filepaths of maches sn files
@@ -87,20 +90,29 @@ def get_data_from_filename(file_name):
     data = {}
     split_name = file_name.split("-", maxsplit=2)
     if len(split_name) != 3:
-        return f"Error 'improper split' -> cannot extract SN + PB from file: {file_name}"
+        data["SN"] = "Error"
+        data["PB"] = "Error"
+        data["REV"] = "Error"
+        data["ERR"] = f"Error 'improper split' -> cannot extract SN + PB from file: {file_name}"
+        return data
     else:
         SN = split_name[0]
         PB = split_name[1]
         if len(SN) != 10 or len(PB) != 11:
-            return f"Error -> unkown SN and PB formats from file: {file_name}"
+            data["SN"] = "Error"
+            data["PB"] = "Error"
+            data["REV"] = "Error"
+            data["ERR"] = f"Error -> unkown SN and PB formats from file: {file_name}"
+            return data
         else:
             data["SN"] = split_name[0]
             data["PB"] = f"{split_name[1][0:9]}"
             data["REV"] = f"{split_name[1][9:]}"
-    #returns folowing dictionary {'SN': '1513054730', 'PB': 'PB5002100', 'REV': '1J'}
+    #returns folowing dictionary {'SN': '1513054730', 'PB': 'PB5002100', 'REV': '1J'} + error warning if it occures
     return data
 
 def get_sn_tracibility(file_paths):
+    #accepts absolute filepaths
     data = []
     for file in file_paths:
         refdes = {}
@@ -141,30 +153,8 @@ def get_sn_tracibility(file_paths):
     return data
             
 
-
-
-def get_component_data_from_id(id_dict, xml_path):
-    xml_tree = ET.parse(xml_path)
-    xml_root = xml_tree.getroot()
-    # use xml_root.attrib to capture time stamps + serial number
-    component_data = {}
-    ref_keys = set()
-    for branch in xml_root:
-        if branch.tag == "charge":
-            for id in id_dict:
-                if id == branch.attrib["id"]:
-                    convert_time_stamp = convert_time_stamp(xml_root.attrib["dateComplete"])
-
-                    refset_key = f"{id_dict[id]}"
-                    component_data[refset_key] = {"PN": branch.attrib["barc1"], "HU": branch.attrib["barc6"], "LC": branch.attrib["barc2"], "TS": formated_time}
-                    ref_keys.add(refset_key)
-
-    #returns nested dictionary and set of keys
-    #example of an output -> {"{'Q1'}": {'PN': '20005985', 'HU': '001014656171', 'LC': '012218', 'TS': '25/04/2024 04:09:11'}}, {"{'Q1'}"}
-    #tuple 1 -> nested dictionary, 2 -> set of strings (keys for nested dictionary)
-    return component_data, ref_keys
-
-    
+def data_cruncher(data_list):
+    pass
 
 
 def data_to_text(file_name_data, tracibility_data, tracibility_keys):
@@ -189,22 +179,18 @@ def main():
     report_name = "new_report.txt"
     rep_path = os.path.join(cwd, report_name)
 
-
-
+    time_filter(1, 3, 2)
+    get_timestamp_from_filename("hi")
 
     test_file_name = sample_files[0]
-    print(test_file_name)
+    
 
     xml_filepath = os.path.join(sample_dir, test_file_name)
     get_data_from_filename(test_file_name)
     
     test_list = ["C8", "C4", "Q1"]
 
-    res_found = ref_des_finder(test_list, xml_filepath)
-    tracibility_data = get_component_data_from_id(res_found, xml_filepath)
     file_data = get_data_from_filename(test_file_name)
-    data = tracibility_data[0]
-    keys = tracibility_data[1]
 
     paths = sn_finder(sample_dir, ["1513028976", "1513054730", "1513562221"])
     get_sn_tracibility(paths)

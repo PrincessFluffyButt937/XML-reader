@@ -11,6 +11,36 @@ from enum import Enum
 
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
+class Data:
+    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace=None, file_path=None):
+        self.sn = sn
+        self.pb = pb
+        self.rev = rev
+        self.err = err
+        self.date = date
+        self.trace = trace
+        self.file_path = file_path
+
+    def __repr__(self):
+        trace_str = "\n"
+        for hu in self.trace:
+            trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}"
+        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}" + trace_str
+        
+    def add_trace(self, hu, trace_dict):
+        if not hu or trace_dict:
+            return
+        if hu in self.trace:
+            self.trace[hu]["REF"].update(trace_dict["REF"])
+        else:
+            self.trace[hu] = trace_dict
+
+    def add_error(self, error):
+        if self.err:
+            self.err = self.err + " / " + error
+        else:
+            self.err = error  
+
 
 modes = ["SN", "HU", "Ref"]
 out_formats = [".txt", ".xls"]
@@ -71,6 +101,7 @@ def sn_finder(folder_path, sn_list):
     #returns a list of absolute filepaths of maches sn files
     #if folder is found, call this function recursively with updated path
     matches = []
+    #!!! implement os.scandir instead of listdir!!!!
     files = os.listdir(folder_path)
     for file in files:
         f_path = os.path.join(folder_path, file)
@@ -93,7 +124,7 @@ def get_data_from_filename(file_name):
         data["SN"] = "Error"
         data["PB"] = "Error"
         data["REV"] = "Error"
-        data["ERR"] = f"Error 'improper split' -> cannot extract SN + PB from file: {file_name}"
+        data["ERR"] = "Error 'improper split' -> cannot extract SN + PB from filename"
         return data
     else:
         SN = split_name[0]
@@ -102,7 +133,7 @@ def get_data_from_filename(file_name):
             data["SN"] = "Error"
             data["PB"] = "Error"
             data["REV"] = "Error"
-            data["ERR"] = f"Error -> unkown SN and PB formats from file: {file_name}"
+            data["ERR"] = "Error -> unkown SN and PB formats from file"
             return data
         else:
             data["SN"] = split_name[0]
@@ -113,18 +144,33 @@ def get_data_from_filename(file_name):
 
 def get_sn_tracibility(file_paths):
     #accepts absolute filepaths
-    data = []
+    obj_data = {} 
+
     for file in file_paths:
         refdes = {}
-        file_data = get_data_from_filename(os.path.basename(file))
-        file_data["DATA"] = {}
-        sn_data = file_data["DATA"]
+        file_name = os.path.basename(file)
+        file_data = get_data_from_filename(file_name)
 
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
+        #maybe loop over the tree instead of find()? what if multiple panels? - unlikely
         panel_branch = tree_root.find("panel")
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
-        #maybe loop over the tree instead of find()? what if multiple panels? - unlikely
+
+        sn = file_data["SN"]
+        if sn == "Error":
+            if time_stamp.startswith("Err"):
+                sn = file_name
+            else:
+                sn = time_stamp
+
+
+        if sn in obj_data:
+            pass
+        else:
+            obj_data[sn] = Data(sn=sn, pb=file_data["PB"],rev=file_data["REV"],date=time_stamp, err=file_data["ERR"], file_path=file)
+
+
         for id in panel_branch:
             ref_set = set()
             for ref in id:
@@ -132,8 +178,9 @@ def get_sn_tracibility(file_paths):
             refdes[id.attrib["id"]] = ref_set
         #after this loop, IDs and references are stored in refdes dictionary for every single file -> ready to be paired with charges.
         for id in refdes:
+
             references = refdes[id]
-            #create red_key func for sorting
+
             for branch in tree_root:
                 if branch.tag == "panel":
                     continue
@@ -141,16 +188,13 @@ def get_sn_tracibility(file_paths):
                     pn = branch.attrib["barc1"]
                     hu = branch.attrib["barc6"]
                     lc = branch.attrib["barc2"]
-                    if hu in sn_data:
-                        sn_data[hu]["REF"].update(references)
-                    else:
-                        sn_data[hu] = {"REF": references, "PN": pn, "LC": lc, "TS": time_stamp }
-        data.append(file_data)
-    #returns a list of nested dictionaties
-    #[{'SN': 'sn', 'PB': 'pb', 'REV': 'rev', 'DATA': {
-    # '001013791456': {'REF': {'R26'}, 'PN': '10009080', 'LC': 'R2247Q2320', 'TS': '25/04/2024 04:09:11'},
-    # '001014030211': {'REF': {'R21'}, 'PN': 'P2018321', 'LC': '03901026', 'TS': '25/04/2024 04:09:11'}}]
-    return data
+
+                    obj_data[sn].add_trace(hu, {"REF": references, "PN": pn, "LC": lc})
+
+    #returns a dictionary serial numbers paired with Data objects
+    #TEST this function!!!
+
+    return obj_data
             
 
 def data_cruncher(data_list):

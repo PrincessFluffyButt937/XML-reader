@@ -101,19 +101,19 @@ def sn_finder(folder_path, sn_list):
     #returns a list of absolute filepaths of maches sn files
     #if folder is found, call this function recursively with updated path
     matches = []
-    #!!! implement os.scandir instead of listdir!!!!
-    files = os.listdir(folder_path)
-    for file in files:
+    for entry in os.scandir(folder_path):
+        file = entry.name
         f_path = os.path.join(folder_path, file)
         if is_xml(f_path):
             for sn in sn_list:
-                if file.startswith(sn):
+                if file.startswith(str(sn)):
                     matches.append(f_path)
         elif os.path.isdir(f_path):
             #recursive call further down the three
             rec_matches = sn_finder(f_path, sn_list)
             if rec_matches:
                 matches.extend(rec_matches)
+
     return matches
 
 def get_data_from_filename(file_name):
@@ -139,6 +139,7 @@ def get_data_from_filename(file_name):
             data["SN"] = split_name[0]
             data["PB"] = f"{split_name[1][0:9]}"
             data["REV"] = f"{split_name[1][9:]}"
+            data["ERR"] = None
     #returns folowing dictionary {'SN': '1513054730', 'PB': 'PB5002100', 'REV': '1J'} + error warning if it occures
     return data
 
@@ -212,37 +213,12 @@ def data_to_text(file_name_data, tracibility_data, tracibility_keys):
 
 def main():
 
-    M_path = list(os.path.split(os.path.abspath(__file__)))
-    #abspath __file__ takes location of main.ps
-    #split separates paths like so ['/home/art/projects/XML_reader', 'main.py'] i=0 -> cwd
-    cwd = M_path[0]
-    sample_dir_name = "xml_samples"
-    sample_dir = os.path.join(cwd, sample_dir_name)
-    sample_files = os.listdir(sample_dir)
-
-    report_name = "new_report.txt"
-    rep_path = os.path.join(cwd, report_name)
-
-    time_filter(1, 3, 2)
-    get_timestamp_from_filename("hi")
-
-    test_file_name = sample_files[0]
-    
-
-    xml_filepath = os.path.join(sample_dir, test_file_name)
-    get_data_from_filename(test_file_name)
-    
-    test_list = ["C8", "C4", "Q1"]
-
-    file_data = get_data_from_filename(test_file_name)
-
-    paths = sn_finder(sample_dir, ["1513028976", "1513054730", "1513562221"])
-    get_sn_tracibility(paths)
+    pass
 
     #with open(rep_path, "w") as file:
     #    file.write(text)
 
-
-main()
+if __name__ == "__main__":
+    main()
 
 

@@ -12,7 +12,7 @@ from enum import Enum
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
 class Data:
-    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace=None, file_path=None):
+    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace={}, file_path=None):
         self.sn = sn
         self.pb = pb
         self.rev = rev
@@ -22,25 +22,39 @@ class Data:
         self.file_path = file_path
 
     def __repr__(self):
-        trace_str = "\n"
+        trace_str = ""
         for hu in self.trace:
-            trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}"
-        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}" + trace_str
-        
+            trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}\n"
+        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}\n" + trace_str
+
+    #rework to properly implement Trace obj instead of dict    
     def add_trace(self, hu, trace_dict):
-        if not hu or trace_dict:
+        if not hu or not trace_dict:
             return
-        if hu in self.trace:
-            self.trace[hu]["REF"].update(trace_dict["REF"])
-        else:
+        if not self.trace:
             self.trace[hu] = trace_dict
+        else:
+            if hu in self.trace:
+                self.trace[hu]["REF"].update(trace_dict["REF"])
+            else:
+                self.trace[hu] = trace_dict
+            
 
     def add_error(self, error):
         if self.err:
             self.err = self.err + " / " + error
         else:
-            self.err = error  
+            self.err = error
 
+#when to use super()??
+class Trace(Data):
+    def __init__(self, ref=set(), pn=None, lc=None):
+        self.ref = ref
+        self.pn = pn
+        self.lc = lc
+    
+    def __repr__(self):
+        return f"PN: {self.pn} / LC: {self.lc} / REF: {self.ref}"
 
 modes = ["SN", "HU", "Ref"]
 out_formats = [".txt", ".xls"]

@@ -19,7 +19,11 @@ class TestMain(unittest.TestCase):
         sn = [1513562221]
         files = sn_finder(sample_path, sn)
         obj_dict = get_sn_tracibility(files)
-        print(obj_dict[str(sn[0])])
+    
+    def test_hu_test(self):
+        hu = ["001012162855"]
+        macthes = hu_finder(sample_path, hu)
+        print(macthes)
 
 
 if __name__ == "__main__":

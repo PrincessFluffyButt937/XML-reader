@@ -3,60 +3,15 @@ import sys
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-#enums for search modes?
-from enum import Enum
+from data import Data, Trace
 
 # "panel" = hides references + their mounted IDs
 # "charge" = actuall component data pairable to IDs
 
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
-class Data:
-    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace={}, file_path=None):
-        self.sn = sn
-        self.pb = pb
-        self.rev = rev
-        self.err = err
-        self.date = date
-        self.trace = trace
-        self.file_path = file_path
 
-    def __repr__(self):
-        trace_str = ""
-        for hu in self.trace:
-            trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}\n"
-        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}\n" + trace_str
-
-    #rework to properly implement Trace obj instead of dict    
-    def add_trace(self, hu, trace_dict):
-        if not hu or not trace_dict:
-            return
-        if not self.trace:
-            self.trace[hu] = trace_dict
-        else:
-            if hu in self.trace:
-                self.trace[hu]["REF"].update(trace_dict["REF"])
-            else:
-                self.trace[hu] = trace_dict
-            
-
-    def add_error(self, error):
-        if self.err:
-            self.err = self.err + " / " + error
-        else:
-            self.err = error
-
-#when to use super()??
-class Trace(Data):
-    def __init__(self, ref=set(), pn=None, lc=None):
-        self.ref = ref
-        self.pn = pn
-        self.lc = lc
-    
-    def __repr__(self):
-        return f"PN: {self.pn} / LC: {self.lc} / REF: {self.ref}"
-
-modes = ["SN", "HU", "Ref"]
+modes = ["SN", "HU"]
 out_formats = [".txt", ".xls"]
 
 def is_xml(file_path):
@@ -108,9 +63,6 @@ def get_timestamp_from_filename(filename):
     else:
         return f"Error - unkown time format -> {filename}"
 
-
-
-
 def sn_finder(folder_path, sn_list):
     #returns a list of absolute filepaths of maches sn files
     #if folder is found, call this function recursively with updated path
@@ -130,41 +82,55 @@ def sn_finder(folder_path, sn_list):
 
     return matches
 
+def hu_finder(folder_path, hu_list):
+    matches = []
+    for entry in os.scandir(folder_path):
+        file = entry.name
+        f_path = os.path.join(folder_path, file)
+        if os.path.isdir(f_path):
+            rec_matches = hu_finder(f_path, hu_list)
+            if rec_matches:
+                matches.extend(rec_matches)
+        elif is_xml(f_path):
+            file_thee = ET.parse(f_path)
+            tree_root = file_thee.getroot()
+            for test in tree_root.findall("charge"):
+                if test.attrib["barc6"] in hu_list:
+                    matches.append(f_path)
+    return matches
+
 def get_data_from_filename(file_name):
-    #improve error returns...!!!
-    data = {}
     split_name = file_name.split("-", maxsplit=2)
     if len(split_name) != 3:
-        data["SN"] = "Error"
-        data["PB"] = "Error"
-        data["REV"] = "Error"
-        data["ERR"] = "Error 'improper split' -> cannot extract SN + PB from filename"
-        return data
+        sn = "Error"
+        pb = None
+        rev = None
+        err = "Error 'improper split' -> cannot extract SN + PB from filename."
     else:
         SN = split_name[0]
         PB = split_name[1]
         if len(SN) != 10 or len(PB) != 11:
-            data["SN"] = "Error"
-            data["PB"] = "Error"
-            data["REV"] = "Error"
-            data["ERR"] = "Error -> unkown SN and PB formats from file"
-            return data
+            sn = "Error"
+            pb = None
+            rev = None
+            err["ERR"] = "Error -> Unkown SN and PB formats from a filename."
         else:
-            data["SN"] = split_name[0]
-            data["PB"] = f"{split_name[1][0:9]}"
-            data["REV"] = f"{split_name[1][9:]}"
-            data["ERR"] = None
-    #returns folowing dictionary {'SN': '1513054730', 'PB': 'PB5002100', 'REV': '1J'} + error warning if it occures
-    return data
+            sn = split_name[0]
+            pb = f"{split_name[1][0:9]}"
+            rev = f"{split_name[1][9:]}"
+            err = None
+    obj = Data(sn=sn, pb=pb, rev=rev, err=err)
+    return obj
 
 def get_sn_tracibility(file_paths):
     #accepts absolute filepaths
-    obj_data = {} 
+    obj_data = {}
 
     for file in file_paths:
         refdes = {}
         file_name = os.path.basename(file)
-        file_data = get_data_from_filename(file_name)
+        file_obj = get_data_from_filename(file_name)
+        file_obj.file_path.append(file)
 
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
@@ -172,19 +138,21 @@ def get_sn_tracibility(file_paths):
         panel_branch = tree_root.find("panel")
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
 
-        sn = file_data["SN"]
+        sn = file_obj.sn
         if sn == "Error":
             if time_stamp.startswith("Err"):
                 sn = file_name
             else:
                 sn = time_stamp
 
-
-        if sn in obj_data:
-            pass
+        file_obj.date = time_stamp
+        if not obj_data:
+            obj_data[sn] = file_obj
         else:
-            obj_data[sn] = Data(sn=sn, pb=file_data["PB"],rev=file_data["REV"],date=time_stamp, err=file_data["ERR"], file_path=file)
-
+            if sn not in obj_data:
+                obj_data[sn] = file_obj
+            else:
+                obj_data[sn].update(file_obj)
 
         for id in panel_branch:
             ref_set = set()
@@ -203,28 +171,15 @@ def get_sn_tracibility(file_paths):
                     pn = branch.attrib["barc1"]
                     hu = branch.attrib["barc6"]
                     lc = branch.attrib["barc2"]
+                    trace_obj = Trace(references, pn, lc)
 
-                    obj_data[sn].add_trace(hu, {"REF": references, "PN": pn, "LC": lc})
+                    obj_data[sn].add_trace(hu, trace_obj)
 
     #returns a dictionary serial numbers paired with Data objects
     #TEST this function!!!
 
     return obj_data
             
-
-def data_cruncher(data_list):
-    pass
-
-
-def data_to_text(file_name_data, tracibility_data, tracibility_keys):
-    #add safeguards
-    converted_data = ""
-    for key in tracibility_keys:
-        ref = key.strip("{}")
-        data = tracibility_data[key]
-        converted_data = converted_data + f"{file_name_data["SN"]}/{file_name_data["PB"]}/{file_name_data["REV"]} - RefDes:{ref} / PN-{data["PN"]} / HU-{data["HU"]} / Lot-Code-{data["LC"]} / Mounted-{data["TS"]}\n"
-    return converted_data
-
 def main():
 
     pass

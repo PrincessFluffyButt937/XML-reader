@@ -1,10 +1,6 @@
 import os
 import sys
 
-import xlsxwriter
-
-from data import Data, Trace
-
 # "panel" = hides references + their mounted IDs
 # "charge" = actuall component data pairable to IDs
 

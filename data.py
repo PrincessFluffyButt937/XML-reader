@@ -1,3 +1,20 @@
+def ref_key(ref):
+    #creates key to for sorted()
+    j = 0
+    for i in range(0, len(ref)):
+        if not ref[i].isdigit():
+            j = i
+        else:
+            break
+    key = ref[j:]
+    while len(key) < 5:
+        key = "0" + key
+    return key
+
+def ref_to_str(ref_set):
+    #converts set of references to sorted string
+    ref_list = sorted(list(ref_set), key=lambda ref: ref_key(ref))
+    return str(ref_list).strip("[]").replace("'", "")
 
 
 class Data:
@@ -55,7 +72,6 @@ class Trace(Data):
         self.lc = lc
     
     def __repr__(self):
-        from functions import ref_to_str
         return f"PN: {self.pn} / Lot Code: {self.lc} / References: {ref_to_str(self.ref)}"
     
     def update(self, other):

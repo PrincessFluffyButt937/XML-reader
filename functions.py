@@ -1,34 +1,42 @@
 import os
-import sys
-from pathlib import Path
+
 import xml.etree.ElementTree as ET
+import xlsxwriter
 
-from data import Data, Trace
+from data import Data, Trace, ref_to_str
 
+def dest_check(dest_path):
+    if os.path.exists(dest_path):
+        if os.path.isdir(dest_path):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+def get_filename(dest_path, file_name, format=".txt"):
+    #function check for whether filename already exists in folder. If so, a number is added to the file_name to avoid overwriting existing reports.
+    #returns absolute paths
+    file_path = os.path.join(dest_path, file_name)
+    if not os.path.exists(file_path):
+        return file_path
+    else:
+        counter = 1
+        split_name = file_name.split(".")
+        base_name = split_name[0]
+        while True:
+            temp = f"{base_name}({counter}){format}"
+            temp_path = os.path.join(dest_path, temp)
+            if os.path.exists(temp_path):
+                counter += 1
+            else:
+                return temp_path
 
 def is_xml(file_path):
     if  os.path.isfile(file_path) and file_path.endswith(".XML"):
         return True
     else:
         return False
-    
-def ref_key(ref):
-    #creates key to for sorted()
-    j = 0
-    for i in range(0, len(ref)):
-        if not ref[i].isdigit():
-            j = i
-        else:
-            break
-    key = ref[j:]
-    while len(key) < 5:
-        key = "0" + key
-    return key
-
-def ref_to_str(ref_set):
-    #converts set of references to sorted string
-    ref_list = sorted(list(ref_set), key=lambda ref: ref_key(ref))
-    return str(ref_list).strip("[]").replace("'", "")
 
 def convert_time_stamp(time_stamp):
     if len(time_stamp) != 16:
@@ -71,10 +79,11 @@ def sn_finder(folder_path, sn_list):
             rec_matches = sn_finder(f_path, sn_list)
             if rec_matches:
                 matches.extend(rec_matches)
-
     return matches
 
 def hu_finder(folder_path, hu_list):
+    #returns a list of absolute filepaths of maches sn files
+    #if folder is found, call this function recursively with updated path
     matches = []
     for entry in os.scandir(folder_path):
         file = entry.name
@@ -183,5 +192,35 @@ def get_sn(folder_path, file_path_list=[]):
 
     matching_file_paths = sn_finder(folder_path, list(sn_list))
     return matching_file_paths
-    
+
+def write_txt(obj_dict, dest_path):
+    pass
+
+def write_xcel(obj_dict, dest_path):
+    row = 0
+    file_mame = "Tracebility report.xlsx"
+    file_path = get_filename(dest_path, file_mame, format=".xlsx")
+    report = xlsxwriter.Workbook(file_path)
+    sheet = report.add_worksheet("Data")
+    sheet.write(row, 0, "Serial Number")
+    sheet.write(row, 1, "Project/Rev.")
+    sheet.write(row, 2, "Handling Unit")
+    sheet.write(row, 3, "Part Number")
+    sheet.write(row, 4, "Lot Code")
+    sheet.write(row, 5, "References")
+    sheet.write(row, 6, "Mounting Date")
+    row += 1
+    for sn in obj_dict:
+        obj = obj_dict[sn]
+        for hu in obj.trace:
+            trace = obj.trace[hu]
+            sheet.write(row, 0, obj.sn)
+            sheet.write(row, 1, f"{obj.pb}/{obj.rev}")
+            sheet.write(row, 2, hu)
+            sheet.write(row, 3, trace.pn)
+            sheet.write(row, 4, trace.lc)
+            sheet.write(row, 5, ref_to_str(trace.ref))
+            sheet.write(row, 6, obj.date)
+            row += 1
+    report.close()
     

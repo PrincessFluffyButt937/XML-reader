@@ -18,7 +18,7 @@ def ref_to_str(ref_set):
 
 
 class Data:
-    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace={}, file_path=[]):
+    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace={}, file_path=set()):
         self.sn = sn
         self.pb = pb
         self.rev = rev
@@ -46,7 +46,7 @@ class Data:
                 self.trace[hu] = trace_obj
     
     def update(self, other):
-        self.file_path.extend(other.file_path)
+        self.file_path.update(other.file_path)
 
     def add_error(self, error):
         if self.err:

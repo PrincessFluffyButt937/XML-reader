@@ -126,13 +126,18 @@ def get_data_from_filename(file_name):
 def get_sn_tracibility(file_paths):
     #accepts absolute filepaths
     obj_data = {}
-
+    it = 0
     for file in file_paths:
+        it +=1
+
+        print (f"\n-----\nIteration = {it}\n-----\n")
+        print(file)
+
         refdes = {}
         file_name = os.path.basename(file)
         file_obj = get_data_from_filename(file_name)
-        file_obj.file_path.append(file)
-
+        file_obj.file_path.add(file)
+        print(f"get sn paths:\n{file_obj.file_path}")
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
         #maybe loop over the tree instead of find()? what if multiple panels? - unlikely
@@ -194,7 +199,16 @@ def get_sn(folder_path, file_path_list=[]):
     return matching_file_paths
 
 def write_txt(obj_dict, dest_path):
-    pass
+    file_name ="Tracebility report.txt"
+    file_path = get_filename(dest_path, file_name)
+    report = "-----------------REPORT-----------------\n"
+    for sn in obj_dict:
+        print(obj_dict[sn].to_text())
+        report = report + obj_dict[sn].to_text() + "----------------------------------\n"
+    with open(file_path, "a") as file:
+        file.write(report)
+
+
 
 def write_xcel(obj_dict, dest_path):
     row = 0

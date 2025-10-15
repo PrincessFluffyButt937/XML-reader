@@ -126,18 +126,14 @@ def get_data_from_filename(file_name):
 def get_sn_tracibility(file_paths):
     #accepts absolute filepaths
     obj_data = {}
-    it = 0
-    for file in file_paths:
-        it +=1
 
-        print (f"\n-----\nIteration = {it}\n-----\n")
-        print(file)
+    for file in file_paths:
 
         refdes = {}
         file_name = os.path.basename(file)
         file_obj = get_data_from_filename(file_name)
         file_obj.file_path.add(file)
-        print(f"get sn paths:\n{file_obj.file_path}")
+
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
         #maybe loop over the tree instead of find()? what if multiple panels? - unlikely

@@ -13,8 +13,8 @@ out_formats = [".txt", ".xls"]
 
             
 def main():
-
-    pass
+    command = sys.argv
+    print(command)
 
     #with open(rep_path, "w") as file:
     #    file.write(text)

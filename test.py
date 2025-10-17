@@ -1,5 +1,6 @@
 import unittest
 from functions import *
+from mode import *
 
 path_to_test = list(os.path.split(os.path.abspath(__file__)))
 sample_path = os.path.join(path_to_test[0], "xml_samples")
@@ -36,7 +37,49 @@ class TestMain(unittest.TestCase):
         macthes = hu_finder(sample_path, hu)
         pass
 
+    def test_mode_01(self):
+        command_str = "1234"
+        result = get_script_mode(command_str)
+        expected = f"Invalid mode format: {command_str}"
+        self.assertEqual(result, expected)
+    
+    def test_mode_02(self):
+        command_str = "-234"
+        result = get_script_mode(command_str)
+        expected = f"Invalid mode: \"2\" is not recognized by this script."
+        self.assertEqual(result, expected)
+    
+    def test_mode_03(self):
+        command_str = "-srt"
+        result = get_script_mode(command_str)
+        expected = Mode.SN_TEXT_TXT
+        self.assertEqual(result, expected)
 
+    def test_mode_04(self):
+        command_str = "-ssr"
+        result = get_script_mode(command_str)
+        expected = "Invalid mode - \"s\" selected multiple times"
+        self.assertEqual(result, expected)
+
+    def test_mode_05(self):
+        command_str = "-shx"
+        result = get_script_mode(command_str)
+        expected = "Invalid mode \"h\" is not allowed to be selected together with either \"s\" or \"c\"."
+        self.assertEqual(result, expected)
+
+    def test_mode_06(self):
+        command_str = "-cpx"
+        result = get_script_mode(command_str)
+        expected = Mode.HUC_PATH_XLS
+        self.assertEqual(result, expected)
+
+    def test_mode_07(self):
+        command_str = "Hello world"
+        result = get_script_mode(command_str)
+        expected = f"Invalid mode format: {command_str}"
+        self.assertEqual(result, expected)
+
+    
 
 if __name__ == "__main__":
     unittest.main()   

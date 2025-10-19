@@ -1,4 +1,6 @@
 from enum import Enum
+import os
+import pandas as pd
 
 class Mode(Enum):
     #search mode__input mode__output format
@@ -118,7 +120,7 @@ def get_script_mode(command_str):
             if x:
                 return Mode.HUC_PATH_XLS
 
-def input_file_check(command_str, enum):
+def input_file_check(command_str="", enum=None):
     if command_str.endswith(".txt"):
         if enum in TXT:
             return True
@@ -132,5 +134,56 @@ def input_file_check(command_str, enum):
     else:
         return False
 
-def raw_data_convertor(command_str, enum):
-    pass
+def raw_data_convertor(command_str="", enum=None):
+    result = set()
+    if not command_str or not enum:
+        return
+    if enum in SN:
+        sn_list = command_str.split(",")
+        for sn in sn_list:
+            edit = sn.strip()
+            if len(edit) == 10 and edit.isdecimal():
+                result.add(edit)
+        return result
+    if enum in HU:
+        hu_list = command_str.split(",")
+        for hu in hu_list:
+            temp = hu.strip()
+            if len(temp) > 12:
+                continue
+            if temp.isdecimal():
+                while len(temp) < 12:
+                    temp = "0" + temp
+                result.add(temp)
+        return result
+
+def read_txt(file_path=""):
+    #reads a file, exctracts numerical data and returns a list.
+    if not file_path or not os.path.exists(file_path):
+        return 1
+    output = set()
+    #set chosen to eliminate duplicte entries
+    with open(file_path, "r") as file:
+        text = file.read()
+        for line in text.split():
+            if not line:
+                continue
+            temp = line.strip()
+            if temp.isdecimal():
+                output.add(temp)
+    return list(output)
+    
+    
+
+def read_excel(file_path="", enum=None):
+    if not file_path or not os.path.exists(file_path):
+        return 1
+    output = set()
+    df = pd.read_excel(file_path, index_col=None, header=None)
+    temp_dict = df.to_dict("list")
+    for key in temp_dict:
+        for entry in temp_dict[key]:
+            temp = str(entry).strip()
+            if temp.isdecimal():
+                output.add(temp)
+    return list(output)

@@ -4,6 +4,7 @@ from mode import *
 
 path_to_test = list(os.path.split(os.path.abspath(__file__)))
 sample_path = os.path.join(path_to_test[0], "xml_samples")
+input_path = os.path.join(path_to_test[0], "Sample_files")
 report_folder = os.path.join(path_to_test[0], "reports")
 
 sn_1 = ["1513562221"]
@@ -79,7 +80,17 @@ class TestMain(unittest.TestCase):
         expected = f"Invalid mode format: {command_str}"
         self.assertEqual(result, expected)
 
-    
+    def test_text_read(self):
+        sn_txt = os.path.join(input_path, "SN text.txt")
+        lst = set(read_txt(sn_txt))
+        expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
+        self.assertEqual(lst, expected)
 
+    def test_excel_read(self):
+        sn_xls = os.path.join(input_path, "SN table.xlsx")
+        lst = set(read_excel(sn_xls))
+        expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
+        self.assertEqual(lst, expected)
+        
 if __name__ == "__main__":
     unittest.main()   

@@ -80,17 +80,43 @@ class TestMain(unittest.TestCase):
         expected = f"Invalid mode format: {command_str}"
         self.assertEqual(result, expected)
 
-    def test_text_read(self):
+    def test_text_read_01(self):
         sn_txt = os.path.join(input_path, "SN text.txt")
         lst = set(read_txt(sn_txt))
         expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
         self.assertEqual(lst, expected)
 
-    def test_excel_read(self):
+    def test_text_read_02(self):
+        sn_txt = os.path.join(input_path, "HU text D+T.txt")
+        txt_out = read_txt(sn_txt)
+        result = set(data_convertor(txt_out, Mode.HU_PATH_TXT))
+        expected = {"001014965295", "001013339297", "001014338053", "001016387737", "001015164076",  "000000123456", "002014338050"}
+        self.assertEqual(result, expected)
+
+    def test_excel_read_01(self):
         sn_xls = os.path.join(input_path, "SN table.xlsx")
         lst = set(read_excel(sn_xls))
         expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
         self.assertEqual(lst, expected)
+
+    def test_excel_read_02(self):
+        sn_xls = os.path.join(input_path, "HU table D+T.xlsx")
+        out_xls = read_excel(sn_xls)
+        result = set(data_convertor(out_xls, Mode.HU_PATH_XLS))
+        expected = {"001014965295", "001013339297", "001014338053", "001016387737", "001015164076", "000000456789", "000000001234"}
+        self.assertEqual(result, expected)
+
+    def test_text_input_01(self):
+        text_in = "1513266000,1513266001,1513266002"
+        result = set(data_convertor(text_in, Mode.SN_TEXT_TXT))
+        expected = {"1513266000", "1513266001", "1513266002"}
+        self.assertEqual(result, expected)
+
+    def test_text_input_02(self):
+        text_in = "1513266000,151326601,1513266002,1234,Hi, "
+        result = set(data_convertor(text_in, Mode.SN_TEXT_TXT))
+        expected = {"1513266000", "1513266002"}
+        self.assertEqual(result, expected)
         
 if __name__ == "__main__":
     unittest.main()   

@@ -23,7 +23,10 @@ SN = {Mode.SN_PATH_TXT, Mode.SN_PATH_XLS, Mode.SN_TEXT_TXT, Mode.SN_TEXT_XLS}
 HU = {Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, Mode.HU_TEXT_TXT, Mode.HU_TEXT_XLS, Mode.HUC_PATH_TXT, Mode.HUC_PATH_XLS, Mode.HUC_TEXT_TXT, Mode.HUC_TEXT_XLS}
 TXT = {Mode.SN_PATH_TXT, Mode.SN_TEXT_TXT, Mode.HU_PATH_TXT, Mode.HU_TEXT_TXT, Mode.HUC_PATH_TXT, Mode.HUC_TEXT_TXT}
 XLS = {Mode.SN_PATH_XLS, Mode.SN_TEXT_XLS, Mode.HU_PATH_XLS, Mode.HU_TEXT_XLS, Mode.HUC_PATH_XLS, Mode.HUC_TEXT_XLS}
+TEXT = {Mode.SN_TEXT_TXT, Mode.SN_TEXT_XLS, Mode.HU_TEXT_TXT, Mode.HU_TEXT_XLS, Mode.HUC_TEXT_TXT, Mode.HUC_TEXT_XLS}
+PATH = {Mode.SN_PATH_TXT, Mode.SN_PATH_XLS, Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, Mode.HUC_PATH_TXT, Mode.HUC_PATH_XLS}
 
+#bound to be reworked
 def get_script_mode(command_str):
     if len(command_str) != 4 or not command_str.startswith("-"):
         return f"Invalid mode format: {command_str}"
@@ -121,69 +124,80 @@ def get_script_mode(command_str):
                 return Mode.HUC_PATH_XLS
 
 def input_file_check(command_str="", enum=None):
-    if command_str.endswith(".txt"):
-        if enum in TXT:
-            return True
-        else:
-            return False
-    elif command_str.endswith(".xlsx"):
-        if enum in XLS:
-            return True
-        else:
-            return False
+    if not command_str or not enum:
+        return
+    if command_str.endswith(".txt") and enum in TXT:
+        return True
+    elif command_str.endswith(".xlsx") and enum in XLS:
+        return True
     else:
         return False
 
-def raw_data_convertor(command_str="", enum=None):
-    result = set()
-    if not command_str or not enum:
-        return
-    if enum in SN:
-        sn_list = command_str.split(",")
-        for sn in sn_list:
-            edit = sn.strip()
-            if len(edit) == 10 and edit.isdecimal():
-                result.add(edit)
-        return result
-    if enum in HU:
-        hu_list = command_str.split(",")
-        for hu in hu_list:
-            temp = hu.strip()
-            if len(temp) > 12:
-                continue
+def sn_convert(entries=[]):
+    converted = set()
+    for entry in entries:
+        temp = entry.strip()
+        if entry:
+            if temp.isdecimal() and len(temp) == 10:
+                converted.add(temp)
+    return list(converted)
+
+
+def hu_convert(entries=[]):
+    converted = set()
+    for entry in entries:
+        temp = entry.strip()
+        if temp:
             if temp.isdecimal():
+                if len(temp) > 12:
+                    continue
                 while len(temp) < 12:
                     temp = "0" + temp
-                result.add(temp)
-        return result
+                converted.add(temp)
+    return list(converted)
+
+def data_convertor(command_str=None, enum=None):
+    if not command_str or not enum:
+        return
+    if enum in TEXT:
+        lst = command_str.split(",")
+        if enum in SN:
+            return sn_convert(lst)
+        if enum in HU:
+            return hu_convert(lst)
+    if enum in PATH:
+        if enum in SN:
+            return sn_convert(command_str)
+        if enum in HU:
+            return hu_convert(command_str)
 
 def read_txt(file_path=""):
     #reads a file, exctracts numerical data and returns a list.
     if not file_path or not os.path.exists(file_path):
         return 1
-    output = set()
-    #set chosen to eliminate duplicte entries
+    output = []
     with open(file_path, "r") as file:
         text = file.read()
         for line in text.split():
             if not line:
                 continue
             temp = line.strip()
-            if temp.isdecimal():
-                output.add(temp)
-    return list(output)
+            if temp:
+                output.append(temp)
+    return output
     
     
-
-def read_excel(file_path="", enum=None):
+def read_excel(file_path=""):
     if not file_path or not os.path.exists(file_path):
         return 1
-    output = set()
+    output = []
     df = pd.read_excel(file_path, index_col=None, header=None)
     temp_dict = df.to_dict("list")
     for key in temp_dict:
         for entry in temp_dict[key]:
+            if not entry:
+                continue
             temp = str(entry).strip()
-            if temp.isdecimal():
-                output.add(temp)
-    return list(output)
+            if temp:
+                output.append(temp)
+    return output

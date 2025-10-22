@@ -2,6 +2,7 @@ import os
 
 import xml.etree.ElementTree as ET
 import xlsxwriter
+from mode import SN, HU, HUC, TXT, XLS
 
 from data import Data, Trace, ref_to_str
       
@@ -200,7 +201,6 @@ def write_txt(obj_dict, dest_path):
     file_path = get_filename(dest_path, file_name)
     report = "-----------------REPORT-----------------\n"
     for sn in obj_dict:
-        print(obj_dict[sn].to_text())
         report = report + obj_dict[sn].to_text() + "----------------------------------\n"
     with open(file_path, "a") as file:
         file.write(report)
@@ -234,4 +234,29 @@ def write_xcel(obj_dict, dest_path):
             sheet.write(row, 6, obj.date)
             row += 1
     report.close()
+
+def search(inp_lst=[], path="", enum=None):
+    if not inp_lst or not path or not enum:
+        return 10
+    if not dest_check(path):
+        return 11
+    if enum in SN:
+        paths = sn_finder(path, inp_lst)
+        return get_sn_tracibility(paths)
+    if enum in HU:
+        paths = hu_finder(path, inp_lst)
+        return get_sn_tracibility(paths)
+    if enum in HUC:
+        base = hu_finder(path, inp_lst)
+        return get_sn(path, base)
+
+def write(dest_path="", data={}, enum=None):
+    if not dest_path or not data or not enum:
+        return 20
+    if not dest_check(dest_path):
+        os.makedirs(dest_path, exist_ok=True)
     
+    if enum in TXT:
+        write_txt(data, dest_path)
+    if enum in XLS:
+        write_xcel(data, dest_path)

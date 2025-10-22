@@ -1,6 +1,9 @@
 import os
 import sys
 
+from mode import Mode, get_script_mode, read_data, read_cfg
+from functions import search, write
+
 # "panel" = hides references + their mounted IDs
 # "charge" = actuall component data pairable to IDs
 
@@ -25,15 +28,36 @@ p = filepath
             
 def main():
     command = sys.argv
+    output_path = ""
+    search_path = ""
+
     '''
     command[0] = main.py
     command[1] = flags
     command[2] = input - serial number / handling unit / filepath to read multiple serial numbers from.
     '''
+    if len(command) != 3:
+        return print('''
+    Invalid function call. Please use following fortmat:
+    [interpeter] [file_name] [flags] [input]
+    python3 main.py -xyz /path/to/file.txt
+    '''
+    )
     flags = command[1]
+    dest_path = ""
     input_string = command[2]
+    script_mode = get_script_mode(flags)
 
-    print(command)
+    if not isinstance(script_mode, Mode):
+        return print(f'''
+Invalid function call -> please select compatible flags in format \"-xyz\":
+Error explanation:
+{script_mode}
+'''
+        )
+    r_data = read_data(input_string, script_mode)
+    data = search(r_data, "", script_mode)
+
 
     #with open(rep_path, "w") as file:
     #    file.write(text)

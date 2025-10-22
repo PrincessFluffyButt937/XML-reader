@@ -1,6 +1,7 @@
 from enum import Enum
 import os
 import pandas as pd
+import tomllib
 
 class Mode(Enum):
     #search mode__input mode__output format
@@ -20,11 +21,14 @@ class Mode(Enum):
     HUC_PATH_XLS = 12
 
 SN = {Mode.SN_PATH_TXT, Mode.SN_PATH_XLS, Mode.SN_TEXT_TXT, Mode.SN_TEXT_XLS}
-HU = {Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, Mode.HU_TEXT_TXT, Mode.HU_TEXT_XLS, Mode.HUC_PATH_TXT, Mode.HUC_PATH_XLS, Mode.HUC_TEXT_TXT, Mode.HUC_TEXT_XLS}
+HU = {Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, Mode.HU_TEXT_TXT, Mode.HU_TEXT_XLS}
+HUC = {Mode.HUC_PATH_TXT, Mode.HUC_PATH_XLS, Mode.HUC_TEXT_TXT, Mode.HUC_TEXT_XLS}
 TXT = {Mode.SN_PATH_TXT, Mode.SN_TEXT_TXT, Mode.HU_PATH_TXT, Mode.HU_TEXT_TXT, Mode.HUC_PATH_TXT, Mode.HUC_TEXT_TXT}
 XLS = {Mode.SN_PATH_XLS, Mode.SN_TEXT_XLS, Mode.HU_PATH_XLS, Mode.HU_TEXT_XLS, Mode.HUC_PATH_XLS, Mode.HUC_TEXT_XLS}
 TEXT = {Mode.SN_TEXT_TXT, Mode.SN_TEXT_XLS, Mode.HU_TEXT_TXT, Mode.HU_TEXT_XLS, Mode.HUC_TEXT_TXT, Mode.HUC_TEXT_XLS}
 PATH = {Mode.SN_PATH_TXT, Mode.SN_PATH_XLS, Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, Mode.HUC_PATH_TXT, Mode.HUC_PATH_XLS}
+
+HU_ALL = HU | HUC
 
 #bound to be reworked
 def get_script_mode(command_str):
@@ -123,12 +127,10 @@ def get_script_mode(command_str):
             if x:
                 return Mode.HUC_PATH_XLS
 
-def input_file_check(command_str="", enum=None):
-    if not command_str or not enum:
-        return
-    if command_str.endswith(".txt") and enum in TXT:
+def input_file_check(file_path="", enum=None):
+    if file_path.endswith(".txt") and enum in TXT:
         return True
-    elif command_str.endswith(".xlsx") and enum in XLS:
+    elif file_path.endswith(".xlsx") and enum in XLS:
         return True
     else:
         return False
@@ -156,25 +158,25 @@ def hu_convert(entries=[]):
                 converted.add(temp)
     return list(converted)
 
-def data_convertor(command_str=None, enum=None):
-    if not command_str or not enum:
-        return
+def data_convertor(input_str=None, enum=None):
     if enum in TEXT:
-        lst = command_str.split(",")
+        lst = input_str.split(",")
         if enum in SN:
             return sn_convert(lst)
-        if enum in HU:
+        if enum in HU_ALL:
             return hu_convert(lst)
     if enum in PATH:
         if enum in SN:
-            return sn_convert(command_str)
-        if enum in HU:
-            return hu_convert(command_str)
+            return sn_convert(input_str)
+        if enum in HU_ALL:
+            return hu_convert(input_str)
+    else:
+        return 1
 
 def read_txt(file_path=""):
     #reads a file, exctracts numerical data and returns a list.
     if not file_path or not os.path.exists(file_path):
-        return 1
+        return 2
     output = []
     with open(file_path, "r") as file:
         text = file.read()
@@ -189,7 +191,7 @@ def read_txt(file_path=""):
     
 def read_excel(file_path=""):
     if not file_path or not os.path.exists(file_path):
-        return 1
+        return 2
     output = []
     df = pd.read_excel(file_path, index_col=None, header=None)
     temp_dict = df.to_dict("list")
@@ -201,3 +203,42 @@ def read_excel(file_path=""):
             if temp:
                 output.append(temp)
     return output
+
+def read_data(cmd_str="", enum=None):
+    if not cmd_str or not enum:
+        return 3
+    if enum in PATH:
+        temp_in = None
+        if input_file_check(cmd_str, enum):
+            if enum in TXT:
+                txt_out = read_txt(cmd_str)
+                return data_convertor(txt_out, enum)
+            if enum in XLS:
+                xls_out = read_excel(cmd_str)
+                return data_convertor(xls_out, enum)
+        else:
+            return 4
+    else:
+        return data_convertor(cmd_str, enum)
+    
+def read_cfg():
+    try:
+        with open("config.toml", "rb") as cfg:
+            settings = tomllib.load(cfg)
+            if not "output_path" in settings:
+                raise Exception(
+        '''
+        Error, ouput_path paramenter is missing in config file.
+        Please make sure to specify output_path = \"path/to/file\" within config.toml file.
+        '''
+        )
+            if not "search_path" in settings:
+                raise Exception(
+        '''
+        Error, search_path paramenter is missing in config file.
+        Please make sure to specify search_path = \"path/to/directory\" within config.toml file.
+        '''
+        )
+            return settings["output_path"], settings["search_path"]
+    except Exception as e:
+        raise Exception(f"Error, config.toml file could not be read: {e}")

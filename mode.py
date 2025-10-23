@@ -222,23 +222,22 @@ def read_data(cmd_str="", enum=None):
         return data_convertor(cmd_str, enum)
     
 def read_cfg():
-    try:
-        with open("config.toml", "rb") as cfg:
-            settings = tomllib.load(cfg)
-            if not "output_path" in settings:
-                raise Exception(
+    with open("config.toml", "rb") as cfg:
+        settings = tomllib.load(cfg)
+        if not "output_path" in settings:
+            print(
         '''
         Error, ouput_path paramenter is missing in config file.
         Please make sure to specify output_path = \"path/to/file\" within config.toml file.
         '''
         )
-            if not "search_path" in settings:
-                raise Exception(
+            return
+        if not "search_path" in settings:
+            print(
         '''
         Error, search_path paramenter is missing in config file.
         Please make sure to specify search_path = \"path/to/directory\" within config.toml file.
         '''
         )
-            return settings["output_path"], settings["search_path"]
-    except Exception as e:
-        raise Exception(f"Error, config.toml file could not be read: {e}")
+            return
+        return settings["output_path"], settings["search_path"]

@@ -1,7 +1,7 @@
 # This is configuration file which sets defaults behavior of this sctript
 
 output_path = "//"
-search_path = "//"
+search_path = "/projects/XML_reader/xml_samples/"
 
 # output_path defines where reports will be generated
 # If output_path is set to "//", reports will be generated within the script folder inside "Generated_reports" directory.

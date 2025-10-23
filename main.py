@@ -2,49 +2,50 @@ import os
 import sys
 
 from mode import Mode, get_script_mode, read_data, read_cfg
-from functions import search, write
+from functions import search, write, dest_check
 
 # "panel" = hides references + their mounted IDs
 # "charge" = actuall component data pairable to IDs
 
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
+path_main = list(os.path.split(os.path.abspath(__file__)))
+script_folder = path_main[0]
+report_folder = os.path.join(script_folder, "Generated reports")
 
-'''
-Flags:
-search:
--s = serial number search
--h = handling unit search (partial sn search)
--c = full tracibility of located handling units (takes twice as long)
-
-Output formats:
-t = text
-x = excel table
-Input format
-r = raw string
-p = filepath
-'''
 
             
 def main():
     command = sys.argv
-    output_path = ""
-    search_path = ""
+    output_path, search_path = read_cfg()
+#destination checks
+    if not dest_check(search_path) or search_path == "//":
+        print(
+            f'''
+Invalid search path -> "{search_path}"
+Make sure to select valid directory path to conduct the search.
+'''
+        )
+        return
 
-    '''
-    command[0] = main.py
-    command[1] = flags
-    command[2] = input - serial number / handling unit / filepath to read multiple serial numbers from.
-    '''
+    if output_path == "//":
+        if not dest_check(report_folder):
+            os.makedirs(report_folder, exist_ok=True)
+        output_path = report_folder
+
+#function call check
     if len(command) != 3:
-        return print('''
-    Invalid function call. Please use following fortmat:
-    [interpeter] [file_name] [flags] [input]
-    python3 main.py -xyz /path/to/file.txt
-    '''
-    )
+        print(
+            '''
+Invalid function call. Please use following fortmat:
+[interpeter] [file_name] [flags] [input]
+python3 main.py -xyz /path/to/file.txt
+'''
+        )
+        return
+
+#flag decode segment
     flags = command[1]
-    dest_path = ""
     input_string = command[2]
     script_mode = get_script_mode(flags)
 
@@ -55,12 +56,14 @@ Error explanation:
 {script_mode}
 '''
         )
+#data reading, searching and writing
     r_data = read_data(input_string, script_mode)
-    data = search(r_data, "", script_mode)
+    data = search(r_data, search_path, script_mode)
+    write(output_path, data, script_mode)
+    print(f'''
+Report generated succesfully at {output_path}
+''')
 
-
-    #with open(rep_path, "w") as file:
-    #    file.write(text)
 
 if __name__ == "__main__":
     main()

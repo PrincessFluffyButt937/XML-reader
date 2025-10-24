@@ -4,20 +4,17 @@ import sys
 from mode import Mode, get_script_mode, read_data, read_cfg
 from functions import search, write, dest_check
 
-# "panel" = hides references + their mounted IDs
-# "charge" = actuall component data pairable to IDs
-
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
+#absolute paths of the scripts location
 path_main = list(os.path.split(os.path.abspath(__file__)))
 script_folder = path_main[0]
 report_folder = os.path.join(script_folder, "Generated reports")
 
-
-            
 def main():
     command = sys.argv
-    output_path, search_path = read_cfg()
+    output_path, search_path = read_cfg(script_folder)
+
 #destination checks
     if not dest_check(search_path) or search_path == "//":
         print(
@@ -50,12 +47,13 @@ python3 main.py -xyz /path/to/file.txt
     script_mode = get_script_mode(flags)
 
     if not isinstance(script_mode, Mode):
-        return print(f'''
+        print(f'''
 Invalid function call -> please select compatible flags in format \"-xyz\":
 Error explanation:
 {script_mode}
 '''
         )
+        return
 #data reading, searching and writing
     r_data = read_data(input_string, script_mode)
     data = search(r_data, search_path, script_mode)

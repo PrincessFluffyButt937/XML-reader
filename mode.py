@@ -221,8 +221,9 @@ def read_data(cmd_str="", enum=None):
     else:
         return data_convertor(cmd_str, enum)
     
-def read_cfg():
-    with open("config.toml", "rb") as cfg:
+def read_cfg(script_path=""):
+    cfg_path = os.path.join(script_path, "config.toml")
+    with open(cfg_path, "rb") as cfg:
         settings = tomllib.load(cfg)
         if not "output_path" in settings:
             print(

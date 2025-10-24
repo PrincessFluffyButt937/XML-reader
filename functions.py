@@ -4,8 +4,7 @@ import xml.etree.ElementTree as ET
 import xlsxwriter
 from mode import SN, HU, HUC, TXT, XLS
 
-from data import Data, Trace, ref_to_str
-      
+from data import Data, Trace, ref_to_str      
 
 def dest_check(dest_path):
     if os.path.exists(dest_path):
@@ -45,14 +44,6 @@ def convert_time_stamp(time_stamp):
         return "UnknownTimeFormat"
     else:
         return f"{time_stamp[6:8]}/{time_stamp[4:6]}/{time_stamp[0:4]} {time_stamp[8:10]}:{time_stamp[10:12]}:{time_stamp[12:14]}"
-
-def time_filter(start, end, timestamp):
-    timestamp = int(timestamp)
-    #accepts time formats YYYYMMDD
-    if timestamp >= start and timestamp <= end:
-        return True
-    else:
-        return False
 
 def get_timestamp_from_filename(filename):
     filename = "1513028976-PB30577001I-1-NO-PCB-BARCODE2545-20240405063324.XML"
@@ -127,19 +118,16 @@ def get_data_from_filename(file_name):
 
 def get_sn_tracibility(file_paths):
     #accepts absolute filepaths
+    #returns a dictionary serial numbers paired with Data objects
     obj_data = {}
-
     for file in file_paths:
-
-        refdes = {}
         file_name = os.path.basename(file)
         file_obj = get_data_from_filename(file_name)
         file_obj.file_path.add(file)
 
+        #XML parsing starts here
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
-        #maybe loop over the tree instead of find()? what if multiple panels? - unlikely
-        panel_branch = tree_root.find("panel")
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
 
         sn = file_obj.sn
@@ -158,11 +146,15 @@ def get_sn_tracibility(file_paths):
             else:
                 obj_data[sn].update(file_obj)
 
-        for id in panel_branch:
-            ref_set = set()
-            for ref in id:
-                ref_set.add(ref.text)
-            refdes[id.attrib["id"]] = ref_set
+        #refdes stores references in "panel" branch in format "id": references
+        #required for pairing with actuall data stored in "charge" sections of xml
+        refdes = {}
+        for panel in tree_root.findall("panel"):
+            for id in panel:
+                ref_set = set()
+                for ref in id:
+                    ref_set.add(ref.text)
+                refdes[id.attrib["id"]] = ref_set
         #after this loop, IDs and references are stored in refdes dictionary for every single file -> ready to be paired with charges.
         for id in refdes:
 
@@ -178,14 +170,10 @@ def get_sn_tracibility(file_paths):
                     trace_obj = Trace(references, pn, lc)
 
                     obj_data[sn].add_trace(hu, trace_obj)
-
-    #returns a dictionary serial numbers paired with Data objects
-    #TEST this function!!!
-
     return obj_data
 
 def get_sn(folder_path, file_path_list=[]):
-    #accepts a list of filepaths, exctracts sn numbers which are then used to find the rest of the mathing file not caught by hu_finder functions.
+    #accepts a list of absolute filepaths, exctracts sn numbers which are then used to find the rest of the mathing file not caught by hu_finder function.
     #optional function
     sn_list = set()
     for file_path in file_path_list:
@@ -204,8 +192,6 @@ def write_txt(obj_dict, dest_path):
         report = report + obj_dict[sn].to_text() + "----------------------------------\n"
     with open(file_path, "a") as file:
         file.write(report)
-
-
 
 def write_xcel(obj_dict, dest_path):
     row = 0

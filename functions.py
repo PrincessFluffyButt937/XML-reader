@@ -149,12 +149,13 @@ def get_sn_tracibility(file_paths):
         #refdes stores references in "panel" branch in format "id": references
         #required for pairing with actuall data stored in "charge" sections of xml
         refdes = {}
-        for panel in tree_root.findall("panel"):
-            for id in panel:
-                ref_set = set()
-                for ref in id:
-                    ref_set.add(ref.text)
-                refdes[id.attrib["id"]] = ref_set
+        for branch in tree_root:
+            if branch.tag == "panel":
+                for id in branch:
+                    ref_set = set()
+                    for ref in id:
+                        ref_set.add(ref.text)
+                    refdes[id.attrib["id"]] = ref_set
         #after this loop, IDs and references are stored in refdes dictionary for every single file -> ready to be paired with charges.
         for id in refdes:
 
@@ -199,25 +200,37 @@ def write_xcel(obj_dict, dest_path):
     file_path = get_filename(dest_path, file_mame, format=".xlsx")
     report = xlsxwriter.Workbook(file_path)
     sheet = report.add_worksheet("Data")
-    sheet.write(row, 0, "Serial Number")
-    sheet.write(row, 1, "Project/Rev.")
-    sheet.write(row, 2, "Handling Unit")
-    sheet.write(row, 3, "Part Number")
-    sheet.write(row, 4, "Lot Code")
-    sheet.write(row, 5, "References")
-    sheet.write(row, 6, "Mounting Date")
+    #sheet fotmating
+    sheet.set_column("A:A", 15)
+    sheet.set_column("B:B", 15)
+    sheet.set_column("C:C", 15)
+    sheet.set_column("D:D", 15)
+    sheet.set_column("E:E", 25)
+    sheet.set_column("F:F", 40)
+    sheet.set_column("G:G", 20)
+    sheet.autofilter("A1:G1")
+    header = report.add_format({"bold": True, "border": 5, "bg_color": "#00B0F0"})
+    basic = report.add_format({"left": 1, "bottom": 1, "right": 1})
+    #header writing
+    sheet.write(row, 0, "Serial Number", header)
+    sheet.write(row, 1, "Project/Rev.", header)
+    sheet.write(row, 2, "Handling Unit", header)
+    sheet.write(row, 3, "Part Number", header)
+    sheet.write(row, 4, "Lot Code", header)
+    sheet.write(row, 5, "References", header)
+    sheet.write(row, 6, "Mounting Date", header)
     row += 1
     for sn in obj_dict:
         obj = obj_dict[sn]
         for hu in obj.trace:
             trace = obj.trace[hu]
-            sheet.write(row, 0, obj.sn)
-            sheet.write(row, 1, f"{obj.pb}/{obj.rev}")
-            sheet.write(row, 2, hu)
-            sheet.write(row, 3, trace.pn)
-            sheet.write(row, 4, trace.lc)
-            sheet.write(row, 5, ref_to_str(trace.ref))
-            sheet.write(row, 6, obj.date)
+            sheet.write(row, 0, obj.sn, basic)
+            sheet.write(row, 1, f"{obj.pb}/{obj.rev}", basic)
+            sheet.write(row, 2, hu, basic)
+            sheet.write(row, 3, trace.pn, basic)
+            sheet.write(row, 4, trace.lc, basic)
+            sheet.write(row, 5, ref_to_str(trace.ref), basic)
+            sheet.write(row, 6, obj.date, basic)
             row += 1
     report.close()
 

@@ -33,7 +33,6 @@ class Data:
             trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}\n"
         return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}\n" + trace_str
 
-    #test
     def add_trace(self, hu, trace_obj):
         if not hu or not trace_obj:
             return

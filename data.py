@@ -18,20 +18,20 @@ def ref_to_str(ref_set):
 
 
 class Data:
-    def __init__(self, sn=None, pb=None, rev=None, err=None, date=None, trace={}, file_path=set()):
+    def __init__(self, sn=None, pb=None, rev=None, date=None, trace={}, file_path=set()):
         self.sn = sn
         self.pb = pb
         self.rev = rev
-        self.err = err
         self.date = date
         self.trace = trace
         self.file_path = file_path
+        #ommit filepaths?
 
     def __repr__(self):
         trace_str = ""
         for hu in self.trace:
             trace_str = trace_str + f"HU: {hu} / {self.trace[hu]}\n"
-        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}, / Error: {self.err}, File: {self.file_path}\n" + trace_str
+        return f"SN: {self.sn}, PB: {self.pb} {self.rev}, Date: {self.date}\n" + trace_str
 
     def add_trace(self, hu, trace_obj):
         if not hu or not trace_obj:
@@ -46,21 +46,21 @@ class Data:
     
     def update(self, other):
         self.file_path.update(other.file_path)
-
-    def add_error(self, error):
-        if self.err:
-            self.err = self.err + " / " + error
-        else:
-            self.err = error
     
     def to_text(self):
         text = f"Serial number: {self.sn}, Project: {self.pb} / {self.rev}, Time stamp: {self.date}\n"
         for hu in self.trace:
             text = text + f"HU: {hu} - {self.trace[hu]}\n"
-        text = text + "Extracted from files:\n"
+        return text
+    
+    def origin(self):
+        text = "Extracted from files:\n"
         for path in self.file_path:
             text = text + path + "\n"
         return text
+        
+    def to_text_complete(self):
+        return self.to_text() + self.origin()
 
 
 #when to use super()??

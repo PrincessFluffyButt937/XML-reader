@@ -241,4 +241,8 @@ def read_cfg(script_path=""):
         '''
         )
             return
-        return settings["output_path"], settings["search_path"]
+        if not "error_report" in settings:
+            settings["error_report"] = False
+        elif not isinstance(settings["error_report"], bool):
+            settings["error_report"] = False
+        return settings["output_path"], settings["search_path"], settings["error_report"]

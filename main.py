@@ -10,10 +10,11 @@ from functions import search, write, dest_check
 path_main = list(os.path.split(os.path.abspath(__file__)))
 script_folder = path_main[0]
 report_folder = os.path.join(script_folder, "Generated reports")
+error_folder = os.path.join(script_folder, "Error reports")
 
 def main():
     command = sys.argv
-    output_path, search_path = read_cfg(script_folder)
+    output_path, search_path, error_report = read_cfg(script_folder)
 
 #destination checks
     if not dest_check(search_path) or search_path == "//":
@@ -56,8 +57,8 @@ Error explanation:
         return
 #data reading, searching and writing
     r_data = read_data(input_string, script_mode)
-    data = search(r_data, search_path, script_mode)
-    write(output_path, data, script_mode)
+    data, errors = search(r_data, search_path, script_mode, error_report)
+    write(output_path, data, script_mode, error_folder, errors, error_report)
     print(f'''
 Report generated succesfully at {output_path}
 ''')

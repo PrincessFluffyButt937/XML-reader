@@ -96,48 +96,45 @@ def hu_finder(folder_path, hu_list):
 def get_data_from_filename(file_name):
     split_name = file_name.split("-", maxsplit=2)
     if len(split_name) != 3:
-        sn = "Error"
-        pb = None
-        rev = None
-        err = "Error 'improper split' -> cannot extract SN + PB from filename."
+        return "Error 'improper split' -> cannot extract SN + PB from filename."
     else:
         SN = split_name[0]
         PB = split_name[1]
         if len(SN) != 10 or len(PB) != 11:
-            sn = "Error"
-            pb = None
-            rev = None
-            err["ERR"] = "Error -> Unkown SN and PB formats from a filename."
+            return "Error -> Unkown SN and PB formats from a filename."
         else:
             sn = split_name[0]
             pb = f"{split_name[1][0:9]}"
             rev = f"{split_name[1][9:]}"
-            err = None
-    obj = Data(sn=sn, pb=pb, rev=rev, err=err)
-    return obj
+            obj = Data(sn=sn, pb=pb, rev=rev)
+            return obj
 
-def get_sn_tracibility(file_paths):
+def get_sn_tracibility(file_paths, error_report=False):
     #accepts absolute filepaths
     #returns a dictionary serial numbers paired with Data objects
     obj_data = {}
+    error_data = {}
     for file in file_paths:
         file_name = os.path.basename(file)
         file_obj = get_data_from_filename(file_name)
-        file_obj.file_path.add(file)
 
+        if not isinstance(file_obj, Data):
+            if error_report:
+                if file_obj not in error_data:
+                    error_data[file_obj] = [file]
+                else:
+                    error_data[file_obj].append(file)
+            continue
+        
         #XML parsing starts here
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
+
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
-
-        sn = file_obj.sn
-        if sn == "Error":
-            if time_stamp.startswith("Err"):
-                sn = file_name
-            else:
-                sn = time_stamp
-
         file_obj.date = time_stamp
+        file_obj.file_path.add(file)
+        sn = file_obj.sn
+
         if not obj_data:
             obj_data[sn] = file_obj
         else:
@@ -158,9 +155,7 @@ def get_sn_tracibility(file_paths):
                     refdes[id.attrib["id"]] = ref_set
         #after this loop, IDs and references are stored in refdes dictionary for every single file -> ready to be paired with charges.
         for id in refdes:
-
             references = refdes[id]
-
             for branch in tree_root:
                 if branch.tag == "panel":
                     continue
@@ -171,7 +166,7 @@ def get_sn_tracibility(file_paths):
                     trace_obj = Trace(references, pn, lc)
 
                     obj_data[sn].add_trace(hu, trace_obj)
-    return obj_data
+    return obj_data, error_data
 
 def get_sn(folder_path, file_path_list=[]):
     #accepts a list of absolute filepaths, exctracts sn numbers which are then used to find the rest of the mathing file not caught by hu_finder function.
@@ -234,28 +229,45 @@ def write_xcel(obj_dict, dest_path):
             row += 1
     report.close()
 
-def search(inp_lst=[], path="", enum=None):
-    if not inp_lst or not path or not enum:
-        return 10
-    if not dest_check(path):
-        return 11
-    if enum in SN:
-        paths = sn_finder(path, inp_lst)
-        return get_sn_tracibility(paths)
-    if enum in HU:
-        paths = hu_finder(path, inp_lst)
-        return get_sn_tracibility(paths)
-    if enum in HUC:
-        base = hu_finder(path, inp_lst)
-        return get_sn(path, base)
-
-def write(dest_path="", data={}, enum=None):
-    if not dest_path or not data or not enum:
-        return 20
+def write_error_report(data, dest_path=""):
     if not dest_check(dest_path):
         os.makedirs(dest_path, exist_ok=True)
-    
+    file_name = "Error report.txt"
+    error_report = get_filename(dest_path, file_name, ".txt")
+    with open(error_report, "a") as file:
+        error_data = "-----------------ERROR_REPORT-----------------\n"
+        if not data:
+            error_data = error_data + "No expected error were registered by this script."
+        else:
+            for error in data:
+                error_data = f"{error_data}{error}\nFile list:\n"
+                for file_path in data[error]:
+                    error_data = f"{error_data}{file_path}\n"
+                error_data = error_data + "----------------------------------\n"
+        file.write(error_data)
+
+def search(inp_lst=[], path="", enum=None, error_report=False):
+    if not inp_lst:
+        return 10
+    if enum in SN:
+        paths = sn_finder(path, inp_lst)
+        return get_sn_tracibility(paths, error_report)
+    if enum in HU:
+        paths = hu_finder(path, inp_lst)
+        return get_sn_tracibility(paths, error_report)
+    if enum in HUC:
+        hu_paths = hu_finder(path, inp_lst)
+        sn_full_path_list = get_sn(path, hu_paths)
+        return get_sn_tracibility(sn_full_path_list, error_report)
+
+def write(dest_path="", data={}, enum=None, error_dest="", errors={}, error_report=False):
+
+    if not dest_check(dest_path):
+        os.makedirs(dest_path, exist_ok=True)
     if enum in TXT:
         write_txt(data, dest_path)
     if enum in XLS:
         write_xcel(data, dest_path)
+
+    if error_report:
+        write_error_report(errors, error_dest)

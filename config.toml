@@ -9,3 +9,8 @@ search_path = "/home/art/projects/XML_reader/xml_samples"
 
 # search_path defines location -> set it to where search need to occur.
 # If there are directories inside specified path, search icludes those directiories as well.
+
+error_report = true
+
+# If error_report is set to true, all XML file which are not within expected (name) format will be listed as separate error file.
+# file will be generated within script directory "Error reports"  

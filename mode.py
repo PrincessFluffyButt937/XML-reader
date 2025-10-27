@@ -126,6 +126,12 @@ def get_script_mode(command_str):
                 return Mode.HUC_PATH_TXT
             if x:
                 return Mode.HUC_PATH_XLS
+            
+def path_constructor(lst=[]):
+    result = lst[0]
+    for i in range(1, len(lst)):
+        result = f"{result} {lst[i]}"
+    return result
 
 def input_file_check(file_path=""):
     if os.path.exists(file_path):

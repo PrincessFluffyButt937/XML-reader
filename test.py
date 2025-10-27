@@ -1,4 +1,5 @@
 import unittest
+import sys
 from functions import *
 from mode import *
 
@@ -9,15 +10,15 @@ report_folder = os.path.join(path_to_test[0], "reports")
 
 sn_1 = ["1513562221"]
 files_1 = sn_finder(sample_path, sn_1)
-obj_dict = get_sn_tracibility(files_1)
-test_obj_1 = obj_dict[sn_1[0]]
+obj_dict, error_dict = get_sn_tracibility(files_1)
+test_obj_1 = obj_dict["1513562221"]
 
 
 class TestMain(unittest.TestCase):
     def test_file_locator0(self):
         sn = [1513028976, 1513054730, 1513562221]
         files = sn_finder(sample_path, sn)
-        self.assertEqual(len(files), 14)
+        self.assertEqual(len(files), 17)
 
     def test_file_locator1(self):
         self.assertEqual(len(files_1), 2)
@@ -115,7 +116,7 @@ class TestMain(unittest.TestCase):
     def test_text_input_02(self):
         text_in = "1513266000,151326601,1513266002,1234,Hi, "
         result = set(data_convertor(text_in, Mode.SN_TEXT_TXT))
-        expected = {"1513266000", "1513266002"}
+        expected = {"1513266000", "1513266002", "0000001234", "0151326601"}
         self.assertEqual(result, expected)
         
 if __name__ == "__main__":

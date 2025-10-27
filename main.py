@@ -1,7 +1,7 @@
 import os
 import sys
 
-from mode import Mode, get_script_mode, read_data, read_cfg
+from mode import Mode, get_script_mode, read_data, read_cfg, path_constructor
 from functions import search, write, dest_check
 
 #"2025091504150200" - time format
@@ -33,7 +33,7 @@ Make sure to select valid directory path to conduct the search.
         output_path = report_folder
 
 #function call check
-    if len(command) != 3:
+    if len(command) < 3:
         print(
             '''
 Invalid function call. Please use following fortmat:
@@ -47,7 +47,12 @@ python3 main.py -xyz /path/to/file.txt      # input file variat
 
 #flag decode segment
     flags = command[1]
-    input_string = command[2]
+    if len(command) == 3:
+        input_string = command[2]
+    else:
+        input_string = path_constructor(command[2:])
+    
+
     script_mode = get_script_mode(flags)
 
     if not isinstance(script_mode, Mode):

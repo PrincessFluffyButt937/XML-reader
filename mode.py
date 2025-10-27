@@ -127,21 +127,48 @@ def get_script_mode(command_str):
             if x:
                 return Mode.HUC_PATH_XLS
 
-def input_file_check(file_path="", enum=None):
-    if file_path.endswith(".txt") and enum in TXT:
-        return True
-    elif file_path.endswith(".xlsx") and enum in XLS:
-        return True
+def input_file_check(file_path=""):
+    if os.path.exists(file_path):
+        if os.path.isfile(file_path):
+            #pandas is capable to read more excel formats, make sure to include the later
+            if file_path.endswith(".txt") or file_path.endswith(".xlsx"):
+                return True
+            else:
+                return False
+        else:
+            raise IsADirectoryError('''
+Error: The selected path is a directory.
+Please make sure to enter a valid absolute path which leads to a file.
+For example:
+\"C:/folder1/folder2/folder3/file.txt\"
+'''
+)
     else:
-        return False
+        raise FileNotFoundError('''
+Error: The selected path is invalid -> the file cannot be located at the provided PATH.
+Please make sure to enter a valid absolute path.
+For example:
+\"C:/folder1/folder2/folder3/file.txt\"
+'''
+)
 
 def sn_convert(entries=[]):
     converted = set()
     for entry in entries:
         temp = entry.strip()
         if entry:
-            if temp.isdecimal() and len(temp) == 10:
+            if temp.isdecimal():
+                if len(temp) > 10:
+                    continue
+                while len(temp) < 10:
+                    temp = "0" + temp
                 converted.add(temp)
+    if not converted:
+        raise Exception('''
+Error: No valid serial numbers available.
+Funtion call aborted.
+'''
+)
     return list(converted)
 
 
@@ -156,6 +183,12 @@ def hu_convert(entries=[]):
                 while len(temp) < 12:
                     temp = "0" + temp
                 converted.add(temp)
+    if not converted:
+        raise Exception('''
+Error: No valid hadnling units available.
+Funtion call aborted.
+'''
+)
     return list(converted)
 
 def data_convertor(input_str=None, enum=None):
@@ -171,12 +204,14 @@ def data_convertor(input_str=None, enum=None):
         if enum in HU_ALL:
             return hu_convert(input_str)
     else:
-        return 1
+        raise Exception('''
+Error, unexpected mode detected.
+\"Read mode\" which has been selected is not implemented.
+'''
+)
 
 def read_txt(file_path=""):
     #reads a file, exctracts numerical data and returns a list.
-    if not file_path or not os.path.exists(file_path):
-        return 2
     output = []
     with open(file_path, "r") as file:
         text = file.read()
@@ -190,8 +225,6 @@ def read_txt(file_path=""):
     
     
 def read_excel(file_path=""):
-    if not file_path or not os.path.exists(file_path):
-        return 2
     output = []
     df = pd.read_excel(file_path, index_col=None, header=None)
     temp_dict = df.to_dict("list")
@@ -205,22 +238,26 @@ def read_excel(file_path=""):
     return output
 
 def read_data(cmd_str="", enum=None):
-    if not cmd_str or not enum:
-        return 3
     if enum in PATH:
-        temp_in = None
-        if input_file_check(cmd_str, enum):
-            if enum in TXT:
+        if input_file_check(cmd_str):
+            if cmd_str.endswith(".txt"):
                 txt_out = read_txt(cmd_str)
                 return data_convertor(txt_out, enum)
-            if enum in XLS:
+            if cmd_str.endswith(".xlsx"):
                 xls_out = read_excel(cmd_str)
                 return data_convertor(xls_out, enum)
         else:
-            return 4
+            raise Exception('''
+Error: File format is not suported.
+Please make sure to only use following formats as input files:
+".txt",  ".xlsx"
+'''
+)
     else:
         return data_convertor(cmd_str, enum)
-    
+
+
+#rework read cfg
 def read_cfg(script_path=""):
     cfg_path = os.path.join(script_path, "config.toml")
     with open(cfg_path, "rb") as cfg:
@@ -229,7 +266,7 @@ def read_cfg(script_path=""):
             print(
         '''
         Error, ouput_path paramenter is missing in config file.
-        Please make sure to specify output_path = \"path/to/file\" within config.toml file.
+        Please make sure to specify output_path = \"path/to/file.txt\" within config.toml file.
         '''
         )
             return

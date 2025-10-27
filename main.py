@@ -6,6 +6,7 @@ from functions import search, write, dest_check
 
 #"2025091504150200" - time format
 #"2025 - year[0-3], 09 -month[4-5], 15 - day[6-7], 04 - hours[8-9], 15 - min[10-11] 02 - seconds[12-13] 00-??"
+
 #absolute paths of the scripts location
 path_main = list(os.path.split(os.path.abspath(__file__)))
 script_folder = path_main[0]
@@ -37,7 +38,9 @@ Make sure to select valid directory path to conduct the search.
             '''
 Invalid function call. Please use following fortmat:
 [interpeter] [file_name] [flags] [input]
-python3 main.py -xyz /path/to/file.txt
+python3 main.py -xyz 0123456789             # raw text variant
+or
+python3 main.py -xyz /path/to/file.txt      # input file variat
 '''
         )
         return

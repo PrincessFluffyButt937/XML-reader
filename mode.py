@@ -113,7 +113,7 @@ def get_script_mode(command_str):
             if t:
                 return Mode.HU_PATH_TXT
             if x:
-                return Mode.HU_TEXT_XLS
+                return Mode.HU_PATH_XLS
     #handling unit search - complete variants
     if c:
         if r:

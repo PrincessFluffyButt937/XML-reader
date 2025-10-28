@@ -163,7 +163,8 @@ def get_sn_tracibility(file_paths, error_report=False):
                     pn = branch.attrib["barc1"]
                     hu = branch.attrib["barc6"]
                     lc = branch.attrib["barc2"]
-                    trace_obj = Trace(references, pn, lc)
+                    trace_obj = Trace(pn, lc)
+                    trace_obj.ref.update(references)
 
                     obj_data[sn].add_trace(hu, trace_obj)
     return obj_data, error_data

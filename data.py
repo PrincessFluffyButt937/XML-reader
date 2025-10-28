@@ -18,13 +18,13 @@ def ref_to_str(ref_set):
 
 
 class Data:
-    def __init__(self, sn=None, pb=None, rev=None, date=None, trace={}, file_path=set()):
+    def __init__(self, sn=None, pb=None, rev=None, date=None):
         self.sn = sn
         self.pb = pb
         self.rev = rev
         self.date = date
-        self.trace = trace
-        self.file_path = file_path
+        self.trace = {}
+        self.file_path = set()
         #ommit filepaths?
 
     def __repr__(self):
@@ -65,8 +65,8 @@ class Data:
 
 #when to use super()??
 class Trace(Data):
-    def __init__(self, ref=set(), pn=None, lc=None):
-        self.ref = ref
+    def __init__(self, pn=None, lc=None):
+        self.ref = set()
         self.pn = pn
         self.lc = lc
     

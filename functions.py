@@ -106,34 +106,39 @@ def get_data_from_filename(file_name):
             sn = split_name[0]
             pb = f"{split_name[1][0:9]}"
             rev = f"{split_name[1][9:]}"
-            obj = Data(sn=sn, pb=pb, rev=rev)
-            return obj
+            obj = Data(pb=pb, rev=rev)
+            return obj, sn
 
-def get_sn_tracibility(file_paths, error_report=False):
+def get_sn_tracibility(file_paths, error_report=False, verbose=False):
     #accepts absolute filepaths
     #returns a dictionary serial numbers paired with Data objects
     obj_data = {}
     error_data = {}
     for file in file_paths:
         file_name = os.path.basename(file)
-        file_obj = get_data_from_filename(file_name)
+        tup_obj = get_data_from_filename(file_name)
 
-        if not isinstance(file_obj, Data):
+        #error handling (potentialy incompatible file)
+        if isinstance(tup_obj, str):
+            #file_obj is a error string here
             if error_report:
-                if file_obj not in error_data:
-                    error_data[file_obj] = [file]
+                if tup_obj not in error_data:
+                    error_data[tup_obj] = [file]
                 else:
-                    error_data[file_obj].append(file)
+                    error_data[tup_obj].append(file)
             continue
         
+        file_obj = tup_obj[0]
+        sn = tup_obj [1]
+
         #XML parsing starts here
         file_thee = ET.parse(file)
         tree_root = file_thee.getroot()
 
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
         file_obj.date = time_stamp
-        file_obj.file_path.add(file)
-        sn = file_obj.sn
+        if verbose:
+            file_obj.file_path.add(file)
 
         if not obj_data:
             obj_data[sn] = file_obj
@@ -186,7 +191,7 @@ def write_txt(obj_dict, dest_path):
     file_path = get_filename(dest_path, file_name)
     report = "-----------------REPORT-----------------\n"
     for sn in obj_dict:
-        report = report + obj_dict[sn].to_text() + "----------------------------------\n"
+        report = f"{report}SN: {sn}, {obj_dict[sn].to_text()}----------------------------------\n"
     with open(file_path, "a") as file:
         file.write(report)
 
@@ -220,7 +225,7 @@ def write_xcel(obj_dict, dest_path):
         obj = obj_dict[sn]
         for hu in obj.trace:
             trace = obj.trace[hu]
-            sheet.write(row, 0, obj.sn, basic)
+            sheet.write(row, 0, sn, basic)
             sheet.write(row, 1, f"{obj.pb}/{obj.rev}", basic)
             sheet.write(row, 2, hu, basic)
             sheet.write(row, 3, trace.pn, basic)

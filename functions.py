@@ -88,10 +88,33 @@ def hu_finder(folder_path, hu_list):
         elif is_xml(f_path):
             file_thee = ET.parse(f_path)
             tree_root = file_thee.getroot()
-            for test in tree_root.findall("charge"):
-                if test.attrib["barc6"] in hu_list:
+            for charge in tree_root.findall("charge"):
+                if "barc6" not in charge.attrib:
+                    continue
+                if charge.attrib["barc6"] in hu_list:
                     matches.append(f_path)
     return matches
+
+#warning, function alters inputted err_dict -> no return
+def add_error(err_dict, error_key, file_path):
+    err_list = {
+        "dateComplete": "Error, key 'dateComplete' is missing within the root of the XML. The file does not follow expected format.",
+        "panel": "Error, XML file contains no 'panel' data. File is either incomplete, the data format is unexpected or there is no tracibility to be collected. ",
+        "id": "Error, there is no identifiable 'id' key inside 'charge' to collect component data.",
+        "barc1": "Error, 'barc1' key is missing. Component PN (part number) cannot be captured.",
+        "barc6": "Error, 'barc6' key is missing. Component HU (handling unit) cannot be captured.",
+        "barc2": "Error, 'barc2' key is missing. Component LC (lot code) cannot be captured."
+        }
+    if error_key not in err_dict:
+        if error_key in err_list:
+            err_dict[err_list[error_key]] = {file_path}
+        else:
+            err_dict[error_key] = {file_path}
+    else:
+        if error_key in err_list:
+            err_dict[err_list[error_key]].add(file_path)
+        else:
+            err_dict[error_key].add(file_path)
 
 def get_data_from_filename(file_name):
     split_name = file_name.split("-", maxsplit=2)
@@ -114,32 +137,34 @@ def get_sn_tracibility(file_paths, error_report=False, verbose=False):
     #returns a dictionary serial numbers paired with Data objects
     obj_data = {}
     error_data = {}
-    for file in file_paths:
-        file_name = os.path.basename(file)
+    for file_path in file_paths:
+        file_name = os.path.basename(file_path)
         tup_obj = get_data_from_filename(file_name)
 
         #error handling (potentialy incompatible file)
         if isinstance(tup_obj, str):
             #file_obj is a error string here
             if error_report:
-                if tup_obj not in error_data:
-                    error_data[tup_obj] = [file]
-                else:
-                    error_data[tup_obj].append(file)
+                add_error(error_data, tup_obj, file_path)
             continue
         
         file_obj = tup_obj[0]
         sn = tup_obj [1]
+        if verbose:
+            file_obj.file_path.add(file_path)
 
         #XML parsing starts here
-        file_thee = ET.parse(file)
+        file_thee = ET.parse(file_path)
         tree_root = file_thee.getroot()
+        #safety check
+        if not "dateComplete" in tree_root.attrib:
+            if error_report:
+                add_error(error_data, "dateComplete", file_path)
+            continue
 
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
         file_obj.date = time_stamp
-        if verbose:
-            file_obj.file_path.add(file)
-
+        #object added / updated in dictionary
         if not obj_data:
             obj_data[sn] = file_obj
         else:
@@ -163,6 +188,18 @@ def get_sn_tracibility(file_paths, error_report=False, verbose=False):
             references = refdes[id]
             for branch in tree_root:
                 if branch.tag == "panel":
+                    continue
+                #error handling for writing Trace object
+                if "id" not in branch.attrib or "barc1" not in branch.attrib or "barc2" not in branch.attrib or "barc6" not in branch.attrib:
+                    if error_report:
+                        if "id" not in branch.attrib:
+                            add_error(error_data, "id", file_path)
+                        if "barc1" not in branch.attrib:
+                            add_error(error_data, "barc1", file_path)
+                        if "barc2" not in branch.attrib:
+                            add_error(error_data, "barc2", file_path)
+                        if "barc6" not in branch.attrib:
+                            add_error(error_data, "barc6", file_path)
                     continue
                 if branch.attrib["id"] == id:
                     pn = branch.attrib["barc1"]

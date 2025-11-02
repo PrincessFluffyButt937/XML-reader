@@ -55,17 +55,6 @@ def convert_time_stamp(time_stamp):
         else:
             return "UnknownTimeFormat"
 
-def get_timestamp_from_filename(filename):
-    filename = "1513028976-PB30577001I-1-NO-PCB-BARCODE2545-20240405063324.XML"
-    spl = filename.rsplit("-", maxsplit=1)
-    if len(spl) != 2:
-        return f"Error - unkown file format -> {filename}"
-    time = spl[1].rstrip(".XML")
-    if time.isdecimal() and len(time) == 14:
-        return time[0:8]
-    else:
-        return f"Error - unkown time format -> {filename}"
-
 def sn_finder(folder_path, sn_list):
     #returns a list of absolute filepaths of maches sn files
     #if folder is found, call this function recursively with updated path

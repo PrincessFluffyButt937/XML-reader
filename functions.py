@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import xml.etree.ElementTree as ET
 import xlsxwriter
@@ -43,7 +44,16 @@ def convert_time_stamp(time_stamp):
     if len(time_stamp) != 16:
         return "UnknownTimeFormat"
     else:
-        return f"{time_stamp[6:8]}/{time_stamp[4:6]}/{time_stamp[0:4]} {time_stamp[8:10]}:{time_stamp[10:12]}:{time_stamp[12:14]}"
+        if time_stamp.isdecimal():
+            day = int(time_stamp[6:8])
+            month = int(time_stamp[4:6])
+            year = int(time_stamp[0:4])
+            hour = int(time_stamp[8:10])
+            minute = int(time_stamp[10:12])
+            second = int(time_stamp[12:14])
+            return datetime(year, month, day, hour, minute, second)
+        else:
+            return "UnknownTimeFormat"
 
 def get_timestamp_from_filename(filename):
     filename = "1513028976-PB30577001I-1-NO-PCB-BARCODE2545-20240405063324.XML"
@@ -103,7 +113,8 @@ def add_error(err_dict, error_key, file_path):
         "id": "Error, there is no identifiable 'id' key inside 'charge' to collect component data.",
         "barc1": "Error, 'barc1' key is missing. Component PN (part number) cannot be captured.",
         "barc6": "Error, 'barc6' key is missing. Component HU (handling unit) cannot be captured.",
-        "barc2": "Error, 'barc2' key is missing. Component LC (lot code) cannot be captured."
+        "barc2": "Error, 'barc2' key is missing. Component LC (lot code) cannot be captured.",
+        "UnknownTimeFormat": "Time format eitrher contains letters, or is longer that expected format."
         }
     if error_key not in err_dict:
         if error_key in err_list:
@@ -163,7 +174,11 @@ def get_sn_tracibility(file_paths, error_report=False, verbose=False):
             continue
 
         time_stamp = convert_time_stamp(tree_root.attrib["dateComplete"])
-        file_obj.date = time_stamp
+        if isinstance(time_stamp, str):
+            if error_report:
+                add_error(error_data, time_stamp, file_path)
+        else:
+            file_obj.date = time_stamp
         #object added / updated in dictionary
         if not obj_data:
             obj_data[sn] = file_obj
@@ -249,6 +264,7 @@ def write_xcel(obj_dict, dest_path):
     sheet.autofilter("A1:G1")
     header = report.add_format({"bold": True, "border": 5, "bg_color": "#00B0F0"})
     basic = report.add_format({"left": 1, "bottom": 1, "right": 1})
+    date = report.add_format({"left": 1, "bottom": 1, "right": 1, 'num_format': "dd/mm/yy hh:mm:ss"})
     #header writing
     sheet.write(row, 0, "Serial Number", header)
     sheet.write(row, 1, "Project/Rev.", header)
@@ -268,7 +284,10 @@ def write_xcel(obj_dict, dest_path):
             sheet.write(row, 3, trace.pn, basic)
             sheet.write(row, 4, trace.lc, basic)
             sheet.write(row, 5, ref_to_str(trace.ref), basic)
-            sheet.write(row, 6, obj.date, basic)
+            if isinstance(obj.date, str):
+                sheet.write(row, 6, obj.date, basic)
+            else:
+                sheet.write_datetime(row, 6, obj.date, date)
             row += 1
     report.close()
 

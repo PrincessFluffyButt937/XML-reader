@@ -4,8 +4,8 @@ from functions import *
 from mode import *
 
 path_to_test = list(os.path.split(os.path.abspath(__file__)))
-sample_path = os.path.join(path_to_test[0], "xml_samples")
-input_path = os.path.join(path_to_test[0], "Sample_files")
+sample_path = os.path.join(path_to_test[0], "Expected XML format - samples")
+input_path = os.path.join(path_to_test[0], "Expected input files")
 report_folder = os.path.join(path_to_test[0], "reports")
 
 sn_1 = ["1513562221"]
@@ -18,7 +18,7 @@ class TestMain(unittest.TestCase):
     def test_file_locator0(self):
         sn = [1513028976, 1513054730, 1513562221]
         files = sn_finder(sample_path, sn)
-        self.assertEqual(len(files), 17)
+        self.assertEqual(len(files), 10)
 
     def test_file_locator1(self):
         self.assertEqual(len(files_1), 2)
@@ -82,26 +82,26 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_text_read_01(self):
-        sn_txt = os.path.join(input_path, "SN text.txt")
+        sn_txt = os.path.join(input_path, "Sample text_1.txt")
         lst = set(read_txt(sn_txt))
         expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
         self.assertEqual(lst, expected)
 
     def test_text_read_02(self):
-        sn_txt = os.path.join(input_path, "HU text D+T.txt")
+        sn_txt = os.path.join(input_path, "Sample text_2.txt")
         txt_out = read_txt(sn_txt)
         result = set(data_convertor(txt_out, Mode.HU_PATH_TXT))
         expected = {"001014965295", "001013339297", "001014338053", "001016387737", "001015164076",  "000000123456", "002014338050"}
         self.assertEqual(result, expected)
 
     def test_excel_read_01(self):
-        sn_xls = os.path.join(input_path, "SN table.xlsx")
+        sn_xls = os.path.join(input_path, "Sample table_1.xlsx")
         lst = set(read_excel(sn_xls))
         expected = {'1513266000', '1513028976', '1513054781', '1513054730', '1513562220', '1513562221', '1513265919'}
         self.assertEqual(lst, expected)
 
     def test_excel_read_02(self):
-        sn_xls = os.path.join(input_path, "HU table D+T.xlsx")
+        sn_xls = os.path.join(input_path, "Sample table_2.xlsx")
         out_xls = read_excel(sn_xls)
         result = set(data_convertor(out_xls, Mode.HU_PATH_XLS))
         expected = {"001014965295", "001013339297", "001014338053", "001016387737", "001015164076", "000000456789", "000000001234"}

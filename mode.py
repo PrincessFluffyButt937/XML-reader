@@ -30,102 +30,66 @@ PATH = {Mode.SN_PATH_TXT, Mode.SN_PATH_XLS, Mode.HU_PATH_TXT, Mode.HU_PATH_XLS, 
 
 HU_ALL = HU | HUC
 
-#bound to be reworked
-def get_script_mode(command_str):
+SEARCH = {"s", "h", "c"}
+INPUT  = {"r", "p"}
+OUTPUT = {"t", "x"}
+ALL_MODES    = SEARCH | INPUT | OUTPUT
+
+COMBO_TO_MODE = {
+    ("s", "r", "t"): Mode.SN_TEXT_TXT,
+    ("s", "r", "x"): Mode.SN_TEXT_XLS,
+    ("s", "p", "t"): Mode.SN_PATH_TXT,
+    ("s", "p", "x"): Mode.SN_PATH_XLS,
+    ("h", "r", "t"): Mode.HU_TEXT_TXT,
+    ("h", "r", "x"): Mode.HU_TEXT_XLS,
+    ("h", "p", "t"): Mode.HU_PATH_TXT,
+    ("h", "p", "x"): Mode.HU_PATH_XLS,
+    ("c", "r", "t"): Mode.HUC_TEXT_TXT,
+    ("c", "r", "x"): Mode.HUC_TEXT_XLS,
+    ("c", "p", "t"): Mode.HUC_PATH_TXT,
+    ("c", "p", "x"): Mode.HUC_PATH_XLS,
+}
+
+def mode_key(flag_set):
+    search = None
+    inp = None
+    out = None
+    for f in flag_set:
+        if f in SEARCH:
+            search = f
+        elif f in INPUT:
+            inp = f
+        elif f in OUTPUT:
+            out = f
+    return search, inp, out
+
+def get_script_mode(command_str: str):
     if len(command_str) != 4 or not command_str.startswith("-"):
         return f"Invalid mode format: {command_str}"
-    s, h, c = False, False, False
-    t, x = False, False
-    r, p = False, False
-    for i in range(1, 4):
-        if command_str[i] == "s":
-            if h or c:
-                return "Invalid mode \"s\" is not allowed to be selected together with either \"h\" or \"c\"."
-            elif s:
-                return "Invalid mode - \"s\" selected multiple times"
-            else:
-                s = True
-        elif command_str[i] == "h":
-            if s or c:
-                return "Invalid mode \"h\" is not allowed to be selected together with either \"s\" or \"c\"."
-            elif h:
-                return "Invalid mode - \"h\" selected multiple times"
-            else:
-                h = True
-        elif command_str[i] == "c":
-            if s or h:
-                return "Invalid mode \"c\" is not allowed to be selected together with either \"s\" or \"h\"."
-            elif c:
-                return "Invalid mode - \"c\" selected multiple times"
-            else:
-                c = True
-        elif command_str[i] == "t":
-            if x:
-                return "Invalid mode \"t\" is not allowed to be selected together with \"x\"."
-            elif t:
-                return "Invalid mode - \"t\" selected multiple times"
-            else:
-                t = True  
-        elif command_str[i] == "x":
-            if t:
-                return "Invalid mode \"x\" is not allowed to be selected together with \"t\"."
-            elif x:
-                return "Invalid mode - \"x\" selected multiple times"
-            else:
-                x = True  
-        elif command_str[i] == "r":
-            if p:
-                return "Invalid mode \"r\" is not allowed to be selected together with \"p\"."
-            elif r:
-                return "Invalid mode - \"r\" selected multiple times"
-            else:
-                r = True  
-        elif command_str[i] == "p":
-            if r:
-                return "Invalid mode \"p\" is not allowed to be selected together with \"r\"."
-            elif p:
-                return "Invalid mode - \"p\" selected multiple times"
-            else:
-                p = True  
-        else:
-            return f"Invalid mode: \"{command_str[i]}\" is not recognized by this script."
-    #mode selection below
-    #serial number search variants
-    if s:
-        if r:
-            if t:
-                return Mode.SN_TEXT_TXT
-            if x:
-                return Mode.SN_TEXT_XLS   
-        if p:
-            if t:
-                return Mode.SN_PATH_TXT
-            if x:
-                return Mode.SN_PATH_XLS
-    #handling unit search - partial variants
-    if h:
-        if r:
-            if t:
-                return Mode.HU_TEXT_TXT
-            if x:
-                return Mode.HU_TEXT_XLS  
-        if p:
-            if t:
-                return Mode.HU_PATH_TXT
-            if x:
-                return Mode.HU_PATH_XLS
-    #handling unit search - complete variants
-    if c:
-        if r:
-            if t:
-                return Mode.HUC_TEXT_TXT
-            if x:
-                return Mode.HUC_TEXT_XLS  
-        if p:
-            if t:
-                return Mode.HUC_PATH_TXT
-            if x:
-                return Mode.HUC_PATH_XLS
+    
+    # check for compatible input flags
+    flags = list(command_str[1:])
+    if any(f not in ALL_MODES for f in flags):
+        unknown_flag = next(f for f in flags if f not in ALL_MODES)
+        return f"Invalid mode -> flag \"{unknown_flag}\" is not recognized by this script."
+    
+    # check for duplicate flags
+    if len(set(flags)) != 3:
+        duplicate = [f for f in ALL_MODES if flags.count(f) > 1]
+        return f'Invalid mode -> duplicate flags detected: {", ".join(sorted(duplicate))}'
+
+    flag_set = set(flags)
+    # group exclusivity check -> "&" finds and return commmon matches between 2 sets (this rule only applies for sets)
+    if len(flag_set & SEARCH) != 1:
+        return 'Invalid mode -> select exactly one of "s","h","c".'
+    if len(flag_set & INPUT) != 1:
+        return 'Invalid mode -> select exactly one of "r","p".'
+    if len(flag_set & OUTPUT) != 1:
+        return 'Invalid mode -> select exactly one of "t","x".'
+    
+    #key_tuple = tuple(sorted(flag_set, key=lambda f: ("shc".find(f), "rp".find(f), "tx".find(f))))
+    key_tuple = mode_key(flag_set)
+    return COMBO_TO_MODE[key_tuple]
             
 def path_constructor(lst=[]):
     result = lst[0]

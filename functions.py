@@ -230,11 +230,16 @@ def get_sn(folder_path, file_path_list=[]):
 def write_txt(obj_dict, dest_path):
     file_name ="Tracebility report.txt"
     file_path = get_filename(dest_path, file_name)
-    report = "-----------------REPORT-----------------\n"
+    header = "-----------------REPORT-----------------\n"
+    with open(file_path, "w") as file:
+        file.write(header)
+        if not obj_dict:
+            file.write("No matches found.")
+            return
     for sn in obj_dict:
-        report = f"{report}SN: {sn}, {obj_dict[sn].to_text()}----------------------------------\n"
-    with open(file_path, "a") as file:
-        file.write(report)
+        report = f"SN: {sn}, {obj_dict[sn].to_text()}----------------------------------\n"
+        with open(file_path, "a") as file:
+            file.write(report)
 
 def write_xcel(obj_dict, dest_path):
     row = 0
@@ -280,22 +285,23 @@ def write_xcel(obj_dict, dest_path):
             row += 1
     report.close()
 
-def write_error_report(data, dest_path=""):
+def write_error_report(data, dest_path):
     if not dest_check(dest_path):
         os.makedirs(dest_path, exist_ok=True)
     file_name = "Error report.txt"
     error_report = get_filename(dest_path, file_name, ".txt")
-    with open(error_report, "a") as file:
-        error_data = "-----------------ERROR_REPORT-----------------\n"
+    header = "-----------------ERROR_REPORT-----------------\n"
+    with open(error_report, "w") as file:
+        file.write(header)
         if not data:
-            error_data = error_data + "No expected error were registered by this script."
-        else:
-            for error in data:
-                error_data = f"{error_data}{error}\nFile list:\n"
-                for file_path in data[error]:
-                    error_data = f"{error_data}{file_path}\n"
-                error_data = error_data + "----------------------------------\n"
-        file.write(error_data)
+            file.write("No expected error were raised by this script.")
+            return
+    for error in data:
+        with open(error_report, "a") as file:
+            file.write(f"{error}\nFile list:\n")
+            for file_path in data[error]:
+                file.write(f"{file_path}\n")
+            file.write("----------------------------------\n")
 
 def search(inp_lst=[], path="", enum=None, error_report=False):
     if not inp_lst:

@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+  <TraceabilityData version="2.1" line="Line1" station="X4" job="Censored Data" boardID="1513562221" boardName="Censored Data" dateBegin="2025091504014100" dateComplete="2025091504023600" errorLabel="1">
+    <panel name="Censored Data" omit="false">
+      <ref id="1054440">
+        <RefDes>R40</RefDes>
+        <RefDes>R41</RefDes>
+      </ref>
+      <ref id="1054425">
+        <RefDes>T1</RefDes>
+        <RefDes>T3</RefDes>
+        <RefDes>T4</RefDes>
+        <RefDes>T2</RefDes>
+      </ref>
+      <ref id="1054439">
+        <RefDes>R15</RefDes>
+        <RefDes>R14</RefDes>
+        <RefDes>R13</RefDes>
+        <RefDes>R10</RefDes>
+        <RefDes>R12</RefDes>
+        <RefDes>R16</RefDes>
+      </ref>
+      <ref id="1054438">
+        <RefDes>C2</RefDes>
+        <RefDes>C1</RefDes>
+        <RefDes>C26</RefDes>
+        <RefDes>C7</RefDes>
+        <RefDes>C37</RefDes>
+        <RefDes>C15</RefDes>
+        <RefDes>C14</RefDes>
+        <RefDes>C5</RefDes>
+        <RefDes>C35</RefDes>
+        <RefDes>C30</RefDes>
+        <RefDes>C32</RefDes>
+        <RefDes>C27</RefDes>
+        <RefDes>C31</RefDes>
+        <RefDes>C4</RefDes>
+        <RefDes>C33</RefDes>
+        <RefDes>C34</RefDes>
+        <RefDes>C29</RefDes>
+        <RefDes>C28</RefDes>
+        <RefDes>C20</RefDes>
+        <RefDes>C36</RefDes>
+        <RefDes>C16</RefDes>
+      </ref>
+      <ref id="1054442">
+        <RefDes>U3</RefDes>
+      </ref>
+      <ref id="1054430">
+        <RefDes>D1</RefDes>
+        <RefDes>D3</RefDes>
+        <RefDes>D2</RefDes>
+      </ref>
+      <ref id="1054429">
+        <RefDes>R11</RefDes>
+        <RefDes>R1</RefDes>
+      </ref>
+      <ref id="1054423">
+        <RefDes>U6</RefDes>
+      </ref>
+      <ref id="1054443">
+        <RefDes>R5</RefDes>
+        <RefDes>R4</RefDes>
+        <RefDes>R3</RefDes>
+        <RefDes>R2</RefDes>
+      </ref>
+      <ref id="1054431">
+        <RefDes>D10</RefDes>
+        <RefDes>D11</RefDes>
+        <RefDes>D12</RefDes>
+      </ref>
+    </panel>
+    <charge id="1054440" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054425" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054439" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054438" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054442" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054430" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054429" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054423" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054443" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="1054431" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+  </TraceabilityData>

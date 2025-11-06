@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+  <TraceabilityData version="2.1" line="Line1" station="X3" job="Censored Data" boardID="1513562221" boardName="Censored Data" dateBegin="2025091504045900" dateComplete="2025091504150200" errorLabel="1">
+    <panel name="Censored Data" omit="false">
+      <ref id="827481">
+        <RefDes>U2</RefDes>
+      </ref>
+      <ref id="827485">
+        <RefDes>C39</RefDes>
+        <RefDes>C25</RefDes>
+        <RefDes>C38</RefDes>
+        <RefDes>C45</RefDes>
+        <RefDes>C44</RefDes>
+        <RefDes>C6</RefDes>
+        <RefDes>C22</RefDes>
+        <RefDes>C40</RefDes>
+        <RefDes>C42</RefDes>
+        <RefDes>C43</RefDes>
+        <RefDes>C23</RefDes>
+        <RefDes>C24</RefDes>
+        <RefDes>C21</RefDes>
+        <RefDes>C41</RefDes>
+      </ref>
+      <ref id="827483">
+        <RefDes>U50</RefDes>
+      </ref>
+    </panel>
+    <charge id="827481" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="827485" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="827483" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>

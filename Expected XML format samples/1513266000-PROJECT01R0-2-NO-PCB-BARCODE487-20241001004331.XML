@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+  <TraceabilityData version="2.1" line="Line1" station="X3" job="Censored Data" boardID="1513266000" boardName="Censored Data" dateBegin="2024100100341202" dateComplete="2024100100433002" errorLabel="1">
+    <panel name="Censored Data" omit="false">
+      <ref id="786106">
+        <RefDes>C29</RefDes>
+        <RefDes>C31</RefDes>
+        <RefDes>C30</RefDes>
+      </ref>
+      <ref id="786100">
+        <RefDes>R8</RefDes>
+        <RefDes>R70</RefDes>
+      </ref>
+      <ref id="786108">
+        <RefDes>L2</RefDes>
+      </ref>
+      <ref id="786104">
+        <RefDes>D9</RefDes>
+        <RefDes>D12</RefDes>
+      </ref>
+      <ref id="786091">
+        <RefDes>Q10</RefDes>
+      </ref>
+      <ref id="786094">
+        <RefDes>U5</RefDes>
+      </ref>
+      <ref id="786092">
+        <RefDes>D10</RefDes>
+      </ref>
+      <ref id="786085">
+        <RefDes>C15</RefDes>
+      </ref>
+      <ref id="786098">
+        <RefDes>Q12</RefDes>
+      </ref>
+      <ref id="786086">
+        <RefDes>R22</RefDes>
+      </ref>
+      <ref id="786107">
+        <RefDes>L3</RefDes>
+      </ref>
+    </panel>
+    <charge id="786106" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786100" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786108" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786104" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786091" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786094" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786092" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786085" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786098" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786086" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="786107" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+  </TraceabilityData>

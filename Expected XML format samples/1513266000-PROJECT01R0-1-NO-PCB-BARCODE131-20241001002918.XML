@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+  <TraceabilityData version="2.1" line="Line1" station="X4" job="Censored Data" boardID="1513266000" boardName="Censored Data" dateBegin="2024100100221002" dateComplete="2024100100291702" errorLabel="1">
+    <panel name="Censored Data" omit="false">
+      <ref id="998967">
+        <RefDes>R21</RefDes>
+      </ref>
+      <ref id="998988">
+        <RefDes>R4</RefDes>
+        <RefDes>R44</RefDes>
+      </ref>
+      <ref id="998973">
+        <RefDes>C37</RefDes>
+      </ref>
+      <ref id="998984">
+        <RefDes>D15</RefDes>
+      </ref>
+      <ref id="998964">
+        <RefDes>C18</RefDes>
+        <RefDes>C17</RefDes>
+        <RefDes>C19</RefDes>
+      </ref>
+      <ref id="998978">
+        <RefDes>R27</RefDes>
+      </ref>
+      <ref id="998987">
+        <RefDes>U4</RefDes>
+      </ref>
+      <ref id="998995">
+        <RefDes>C12</RefDes>
+        <RefDes>C13</RefDes>
+        <RefDes>C11</RefDes>
+      </ref>
+      <ref id="998968">
+        <RefDes>D3</RefDes>
+      </ref>
+      <ref id="998981">
+        <RefDes>C32</RefDes>
+      </ref>
+      <ref id="998970">
+        <RefDes>C14</RefDes>
+      </ref>
+      <ref id="998971">
+        <RefDes>R19</RefDes>
+      </ref>
+      <ref id="998972">
+        <RefDes>C20</RefDes>
+      </ref>
+      <ref id="998979">
+        <RefDes>R28</RefDes>
+        <RefDes>R29</RefDes>
+      </ref>
+      <ref id="998982">
+        <RefDes>U6</RefDes>
+      </ref>
+      <ref id="998966">
+        <RefDes>R32</RefDes>
+        <RefDes>R24</RefDes>
+      </ref>
+      <ref id="998994">
+        <RefDes>C7</RefDes>
+      </ref>
+      <ref id="998986">
+        <RefDes>R17</RefDes>
+        <RefDes>R20</RefDes>
+      </ref>
+      <ref id="998976">
+        <RefDes>L4</RefDes>
+      </ref>
+      <ref id="998992">
+        <RefDes>U12</RefDes>
+        <RefDes>U11</RefDes>
+        <RefDes>U9</RefDes>
+        <RefDes>U2</RefDes>
+      </ref>
+    </panel>
+    <charge id="998967" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998988" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998973" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998984" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998964" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998978" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998987" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998995" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998968" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998981" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998970" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998971" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998972" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998979" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998982" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998966" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998994" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998986" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998976" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="998992" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+  </TraceabilityData>

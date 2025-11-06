@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+  <TraceabilityData version="2.1" line="Line1" station="X3" job="Censored Data" boardID="1513266000" boardName="Censored Data" dateBegin="2024093001535902" dateComplete="2024093002233002" errorLabel="1">
+    <panel name="Censored Data" omit="false">
+      <ref id="785984">
+        <RefDes>R43</RefDes>
+      </ref>
+      <ref id="785976">
+        <RefDes>R36</RefDes>
+      </ref>
+      <ref id="785979">
+        <RefDes>R47</RefDes>
+        <RefDes>R54</RefDes>
+      </ref>
+      <ref id="785978">
+        <RefDes>R51</RefDes>
+        <RefDes>R33</RefDes>
+        <RefDes>R34</RefDes>
+      </ref>
+      <ref id="785972">
+        <RefDes>R66</RefDes>
+        <RefDes>R67</RefDes>
+        <RefDes>R9</RefDes>
+      </ref>
+      <ref id="785943">
+        <RefDes>Q7</RefDes>
+        <RefDes>Q8</RefDes>
+      </ref>
+      <ref id="785927">
+        <RefDes>D7</RefDes>
+        <RefDes>D5</RefDes>
+        <RefDes>D4</RefDes>
+      </ref>
+      <ref id="785987">
+        <RefDes>U10</RefDes>
+      </ref>
+      <ref id="785983">
+        <RefDes>R69</RefDes>
+        <RefDes>R60</RefDes>
+        <RefDes>R7</RefDes>
+      </ref>
+      <ref id="785941">
+        <RefDes>U8</RefDes>
+      </ref>
+      <ref id="785986">
+        <RefDes>R2</RefDes>
+        <RefDes>R11</RefDes>
+      </ref>
+      <ref id="785971">
+        <RefDes>R40</RefDes>
+      </ref>
+      <ref id="785981">
+        <RefDes>R1</RefDes>
+      </ref>
+      <ref id="785969">
+        <RefDes>D1</RefDes>
+        <RefDes>D6</RefDes>
+        <RefDes>D17</RefDes>
+      </ref>
+      <ref id="785961">
+        <RefDes>R16</RefDes>
+        <RefDes>R71</RefDes>
+      </ref>
+      <ref id="785982">
+        <RefDes>R45</RefDes>
+      </ref>
+      <ref id="785985">
+        <RefDes>R25</RefDes>
+        <RefDes>R23</RefDes>
+      </ref>
+      <ref id="785939">
+        <RefDes>R35</RefDes>
+        <RefDes>R61</RefDes>
+      </ref>
+    </panel>
+    <charge id="785984" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785976" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785979" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785978" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785972" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785943" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785927" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785987" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785983" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785941" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785986" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785971" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785981" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785969" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785961" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785982" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785985" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+    <charge id="785939" barc1="Part Number" barc2="Lot Code" barc6="Handling Unit"/>
+  </TraceabilityData>

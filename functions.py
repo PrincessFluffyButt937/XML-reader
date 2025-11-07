@@ -236,10 +236,9 @@ def write_txt(obj_dict, dest_path):
         if not obj_dict:
             file.write("No matches found.")
             return
-    for sn in obj_dict:
-        report = f"SN: {sn}, {obj_dict[sn].to_text()}----------------------------------\n"
-        with open(file_path, "a") as file:
-            file.write(report)
+    with open(file_path, "a") as file:
+        for sn in obj_dict:
+            file.write(f"SN: {sn}, {obj_dict[sn].to_text()}----------------------------------\n")
 
 def write_xcel(obj_dict, dest_path):
     row = 0

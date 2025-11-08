@@ -91,20 +91,26 @@ def get_script_mode(command_str: str):
     key_tuple = mode_key(flag_set)
     return COMBO_TO_MODE[key_tuple]
             
-def path_constructor(lst=[]):
-    result = lst[0]
-    for i in range(1, len(lst)):
-        result = f"{result} {lst[i]}"
-    return result
+def input_constructor(lst=[], enum=None):
+    if enum in TEXT:
+        converted_list = []
+        for entry in lst:
+            temp_list = entry.split(",")
+            for temp_str in temp_list:
+                temp_list_2 = temp_str.split(" ")
+                converted_list.extend(temp_list_2)
+        return converted_list
+    if enum in PATH:
+        #constructs a path -> returns string
+        result = lst[0]
+        for i in range(1, len(lst)):
+            result = f"{result} {lst[i]}"
+        return result
 
 def input_file_check(file_path=""):
     if os.path.exists(file_path):
         if os.path.isfile(file_path):
-            #pandas is capable to read more excel formats, make sure to include the later
-            if file_path.endswith(".txt") or file_path.endswith(".xlsx"):
-                return True
-            else:
-                return False
+            return True
         else:
             raise IsADirectoryError('''
 Error: The selected path is a directory.
@@ -161,18 +167,11 @@ Funtion call aborted.
 )
     return list(converted)
 
-def data_convertor(input_str=None, enum=None):
-    if enum in TEXT:
-        lst = input_str.split(",")
-        if enum in SN:
-            return sn_convert(lst)
-        if enum in HU_ALL:
-            return hu_convert(lst)
-    if enum in PATH:
-        if enum in SN:
-            return sn_convert(input_str)
-        if enum in HU_ALL:
-            return hu_convert(input_str)
+def data_convertor(input_data=None, enum=None):
+    if enum in SN:
+        return sn_convert(input_data)
+    elif enum in HU_ALL:
+        return hu_convert(input_data)
     else:
         raise Exception('''
 Error, unexpected mode detected.
@@ -213,14 +212,14 @@ def read_data(cmd_str="", enum=None):
             if cmd_str.endswith(".txt"):
                 txt_out = read_txt(cmd_str)
                 return data_convertor(txt_out, enum)
-            if cmd_str.endswith(".xlsx"):
+            if cmd_str.endswith(".xlsx") or cmd_str.endswith(".xls"):
                 xls_out = read_excel(cmd_str)
                 return data_convertor(xls_out, enum)
         else:
             raise Exception('''
 Error: File format is not suported.
 Please make sure to only use following formats as input files:
-".txt",  ".xlsx"
+".txt", "xls" or ".xlsx"
 '''
 )
     else:

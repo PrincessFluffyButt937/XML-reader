@@ -1,7 +1,7 @@
 import os
 import sys
 
-from mode import Mode, get_script_mode, read_data, read_cfg, path_constructor
+from mode import Mode, get_script_mode, read_data, read_cfg, input_constructor
 from functions import search, write, dest_check
 
 #"2025091504150200" - time format
@@ -45,16 +45,10 @@ python3 main.py -xyz /path/to/file.txt      # input file variat
         )
         return
 
-#flag decode segment
+#input/flag decode segment
     flags = command[1]
-    if len(command) == 3:
-        input_string = command[2]
-    else:
-        input_string = path_constructor(command[2:])
-    
-
     script_mode = get_script_mode(flags)
-
+    user_input = input_constructor(command[2:], script_mode)
     if not isinstance(script_mode, Mode):
         print(f'''
 Invalid function call -> please select compatible flags in format \"-xyz\":
@@ -64,7 +58,7 @@ Error explanation:
         )
         return
 #data reading, searching and writing
-    r_data = read_data(input_string, script_mode)
+    r_data = read_data(user_input, script_mode)
     data, errors = search(r_data, search_path, script_mode, error_report)
     write(output_path, data, script_mode, error_folder, errors, error_report)
     print(f'''

@@ -1,16 +1,17 @@
 # This is configuration file which sets defaults behavior of this sctript
 
-output_path = "//"
-search_path = "/home/art/projects/XML_reader/xml_samples"
+output_path = '//'
+search_path = '//'
 
 # output_path defines where reports will be generated
-# If output_path is set to "//", reports will be generated within the script folder inside "Generated_reports" directory.
+# If output_path is set to '//', reports will be generated within the script folder inside "Generated_reports" directory.
 # Fn nonexisting path will is written, it will be generated EXACTLY as it is typed.
 
 # search_path defines location -> set it to where search need to occur.
 # If there are directories inside specified path, search icludes those directiories as well.
+# Important! Be sure to enclose desired paths in single quotes 'path' and NOT double quotes "path". Using double quotes may result in error!
 
 error_report = false
 
 # If error_report is set to true, all XML file which are not within expected (name) format will be listed as separate error file.
-# file will be generated within script directory "Error reports"  
+# file will be generated within script directory "Error reports"

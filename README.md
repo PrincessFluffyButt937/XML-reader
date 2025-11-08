@@ -1,12 +1,35 @@
 # XML-reader
 This script was written as a temporary replacement for more sophisticated software.<br>
 It is only meant for very specific use case. It is designed to parse through already generated XML files in specific format.<br>
-Expected XML sample files are available in "Expected XML format - samples" directory from this repository.
+Expected XML sample files are available in "Expected XML format samples" directory from this repository.
 
 ## The script function
 This script is meant to parse through (user defined) direcrory of XML files, searching for mathing data requested by the user.<br>
 Searching phase inludes data in nested directories.<br>
 The script capable of searching for **matching serial numbers and handling units**. If any matching XML file is located, the most important data is captured to be written into "human" readable format -> either excel table or text file.
+
+## Dependecies
+This script utilizes third party packages and relies to read and write .xlsx (Excel) files.<br>
+Without these packages, this script cannot function.<br>
+
+**<ins>The list of dependencies:</ins>**<br>
+
+|**<ins>Dependencies</ins>**|**<ins>Versions</ins>**|
+|------|------|
+|**python**|**3.13.9** or newer<br>
+|**xlsxwriter**|**3.2.9** or newer<br>
+|**Pandas excel package:**|Packages bellow<br>
+|**xlrd**|**2.0.2** or newer|<br>
+|**openpyxl**|**3.1.5** or newer|<br>
+|**pyxlsb**|**1.0.10** or newer|<br>
+|**python-calamine**|**0.5.3** or newer|<br>
+
+**Links to third party packages:**<br>
+[XlsxWriter instalation guide](https://xlsxwriter.readthedocs.io/getting_started.html)<br>
+[Pandas excel package intalation guide](https://pandas.pydata.org/docs/getting_started/install.html#excel-files)<br>
+
+_Note:_<br>
+_The entirity of Pandas can be installed instead of just excel package, however only excel pakcage is essential for function of this sctript._
 
 ## Execution and capabilites
 ### Execution
@@ -20,36 +43,39 @@ python3 main.py -xyz user_input
 
 **<ins>Command explanation:</ins>**
 
-**py / python3**&ensp;-> Tells the command to run a file through python interpreter<br>
-**main.py**&ensp;&ensp;&ensp;&ensp;&ensp; -> Absolute path of the main.py (script location). For example "C:/folder1/folder2/XML_reader/main.py"<br>
-**-xyz**&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;-> Flags used to deretmine scripts mode.All flags will listed further down this file.<br>
-**user_input**&ensp;&ensp;&ensp;&ensp;-> User input (data). Either raw text "0123456789" or absolute path to a file "c:/folder1/folder2/input.txt"<br>
+|**<ins>Command portion</ins>**|**<ins>Brief explanation</ins>**|
+|------|------|
+|**py / python3**|Tells the command to run a file through python interpreter|<br>
+|**main.py**|Absolute path of the main.py (script location). For example "C:\XML_reader\main.py"|<br>
+|**-xyz**|Flags used to deretmine scripts mode. All flags will listed further down this file.|<br>
+|**user_input**|User input (data). Either raw text "0123456789" or absolute path to a file "c:\user1\Desktop\input.txt"|<br>
 
-## Capabilites
-### Reading data
+### Capabilites
+<ins>**Reading data**</ins>
 
-The script is capable to read user_input either directly from **1\*** commad line or from **2\*** provided .txt or .xlsx (excel) files.<br>
+The script is capable to read user_input either directly from **1\*** commad line or from **2\*** provided .txt (text file) or .xls and .xlsx (excel) files.<br>
 
 **<ins>Only numerical values in folowing format can be read:</ins>**<br>
-Leading 0s can be ommited -> For example if you need to search for 0045678956, input without leading 0s is acceptale = 45678956. The script is designed to handle such input.
-If any letter added in between the input numbers (For example 014a123456) or if the input number is too long (10 for serial numbers and 12 for handling units), the entry is ommited by the script.
+Leading 0s can be ommited -> For example if you need to search for 0045678956, input without leading 0s is acceptale = 45678956. The script is designed to handle such input.<br>
+If any letter added in between the input numbers (For example 014a123456) or if the input number is too long (10 for serial numbers and 12 for handling units), the entry is ommited by the script.<br>
 
-__1*__ "0123456789,8321456987" -> will result is search for these numbers 0123456789 8321456987 (The comma "," serves as separator -> do not use spaces!)
+__1*__ "0123456789,8321456987" or "0123456789, 8321456987" -> will result is search for these numbers 0123456789 8321456987. The input **must be separated** with either a space " "  or comma "," (or both ", ").<br>
 
 __2*__ Designated columm in excell or text file.<br>
-The expected data format can be found in "Expected input files".<br>
+The expected data format can be found in "Expected input files" directory inside this reposiory.<br>
 *Note for excel:*<br>
 *It does not matter which columm contains the data. However, it is preferable for the sheet to contain only desired input data (serial numbers of handling units).*
 
-### Directories
+### Directories (search and outut)
 
-This script is using a config file "config.toml" to specify the searching location and output location.
-Search location (directory) -> directory which contains compatible XML which need to be parsed through -> this script only reads XML files. No alterations occurs during the search.
-Output location (directory) -> directory where generated reports are being exported to.
+**This script is using a config file** "config.toml" to specify the searching location and output location.<br>
+This congfig file can be found in the root directory of this repository.<br>
+**Search location** (directory) -> directory which contains compatible XML which need to be parsed through -> this script only reads XML files. No alterations occurs during the search.<br>
+**Output location** (directory) -> directory where generated reports are being exported to (optional parameter).<br>
 
 ## Flag system
-Flags define what kind of input is recieved, what kind of data it should look for, and what output is desired by the user. They fall into 3 categories -> search, input type, output type.
-Flags are written in a sequence of 4 charachters. The flag starts with a dash symbol "-" and 3 letters which define the mode for the script. For examle "-srx"
+Flags define what kind of input is recieved, what kind of data it should look for and what output is desired by the user. **They all fall into 3 exclusive categories -> search, input type, output type.**<br>
+Flags are written in a sequence of 4 charachters. **The flag starts with a dash symbol "-"** and 3 letters which define the mode for the script. For examle "-srx".<br>
 
 **<ins>Search:</ins>**<br>
 _Tells the sctipt what it is searching for._
@@ -75,7 +101,7 @@ Flags from each category are unique -> mutliple flags from the same category can
 Flags from each category must be spefied.
 Flags can be writen in any order -> For example "-hpx" causes the same actions within a script as -"-pxh".
 
-## Notice
+## NoticeS
 This scripts main function is to eliminate unnecessary human labor as software used to gather the data became incompatible with out current solution.
 
-For now, the software is capable of gathering the data without issues from very limited sample size. However, i cannot say for sure how would the script fare in cases when data from thousands of files might be stored and written.
+The script is capable of gathering the data withoSut issues from very limited sample size. It should work reliably, however real life testing is required to improve it's function.

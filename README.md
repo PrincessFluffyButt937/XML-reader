@@ -101,7 +101,7 @@ Flags from each category are unique -> mutliple flags from the same category can
 Flags from each category must be spefied.
 Flags can be writen in any order -> For example "-hpx" causes the same actions within a script as -"-pxh".
 
-## NoticeS
+### Notice
 This scripts main function is to eliminate unnecessary human labor as software used to gather the data became incompatible with out current solution.
 
 The script is capable of gathering the data withoSut issues from very limited sample size. It should work reliably, however real life testing is required to improve it's function.
